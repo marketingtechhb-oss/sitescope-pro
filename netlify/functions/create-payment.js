@@ -12,13 +12,14 @@
 const crypto = require("crypto");
 const { getSafeStore } = require("./_lib/blob-store");
 
-// $2 is below the minimum payment amount NOWPayments enforces for several
-// cryptocurrencies (network-fee-driven minimums vary per coin). $5 clears
-// the minimum for the large majority of supported currencies. Adjust here
-// if you restrict to specific low-fee coins (e.g. USDT-TRC20, TRX) and want
-// to lower it — check https://nowpayments.io's minimum-amount status page
-// or the /v1/min-amount endpoint for exact current minimums per currency.
-const PRICE_USD = 5;
+// $2 and $5 both proved too low for some cryptocurrencies' NOWPayments
+// minimums (network-fee-driven minimums vary per coin, and there's no single
+// universal floor across all ~150 supported currencies). $9.99 clears the
+// minimum for the very large majority of currencies. If you restrict to
+// specific low-fee coins (e.g. USDT-TRC20, TRX) you could safely lower this —
+// check https://nowpayments.io's minimum-amount status page or the
+// /v1/min-amount endpoint for exact current minimums per currency.
+const PRICE_USD = 9.99;
 const API_BASE = process.env.NOWPAYMENTS_API_BASE || "https://api.nowpayments.io/v1";
 
 function cors(body, statusCode = 200) {
