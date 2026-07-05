@@ -34,12 +34,10 @@ exports.handler = async (event) => {
   }
 
   try {
-    const res = await fetch(
-      `${API_BASE}/min-amount?currency_from=${encodeURIComponent(currencyFrom)}&currency_to=${encodeURIComponent(currencyTo)}&fiat_equivalent=usd`,
-      { headers: { "x-api-key": apiKey } }
-    );
+    const url = `${API_BASE}/min-amount?currency_from=${encodeURIComponent(currencyFrom)}&currency_to=${encodeURIComponent(currencyTo)}`;
+    const res = await fetch(url, { headers: { "x-api-key": apiKey } });
     const data = await res.json();
-    return cors({ status: res.status, data, apiBaseUsed: API_BASE });
+    return cors({ status: res.status, data, urlCalled: url, rawCurrencyFromReceived: currencyFrom });
   } catch (err) {
     return cors({ error: "Unexpected error: " + (err.message || String(err)) }, 500);
   }
