@@ -9,6 +9,7 @@ const { normalizeEmail, isValidEmail, addOrderToEmailIndex } = require("./_lib/e
 const { getSafeStore } = require("./_lib/blob-store");
 
 const PRICE_USD = 2;
+const API_BASE = process.env.NOWPAYMENTS_API_BASE || "https://api.nowpayments.io/v1";
 
 function cors(body, statusCode = 200) {
   return {
@@ -49,7 +50,7 @@ exports.handler = async (event) => {
   const orderId = crypto.randomUUID();
 
   try {
-    const invoiceRes = await fetch("https://api.nowpayments.io/v1/invoice", {
+    const invoiceRes = await fetch(`${API_BASE}/invoice`, {
       method: "POST",
       headers: {
         "x-api-key": apiKey,
