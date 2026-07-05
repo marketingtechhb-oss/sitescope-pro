@@ -12,14 +12,13 @@
 const crypto = require("crypto");
 const { getSafeStore } = require("./_lib/blob-store");
 
-// $2 and $5 both proved too low for some cryptocurrencies' NOWPayments
-// minimums (network-fee-driven minimums vary per coin, and there's no single
-// universal floor across all ~150 supported currencies). $9.99 clears the
-// minimum for the very large majority of currencies. If you restrict to
-// specific low-fee coins (e.g. USDT-TRC20, TRX) you could safely lower this —
-// check https://nowpayments.io's minimum-amount status page or the
-// /v1/min-amount endpoint for exact current minimums per currency.
-const PRICE_USD = 9.99;
+// Measured directly against this NOWPayments account via /v1/min-amount:
+// USDT-TRC20 ~$11.18, USDT-ERC20 ~$12.51, USDC-Polygon ~$11.94, TRX ~$11.77.
+// Stablecoins clustering around $11-12.5 (despite near-zero network fees)
+// indicates an account-level minimum floor, not just per-coin network fees.
+// $14.99 clears this with margin. Re-check with check-min.js if NOWPayments
+// lowers your account's floor later (e.g. after further account verification).
+const PRICE_USD = 14.99;
 const API_BASE = process.env.NOWPAYMENTS_API_BASE || "https://api.nowpayments.io/v1";
 
 function cors(body, statusCode = 200) {
