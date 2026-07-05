@@ -83,6 +83,7 @@ exports.handler = async (event) => {
 
     return cors({ orderId, invoiceUrl: invoiceData.invoice_url });
   } catch (err) {
-    return cors({ error: "Unexpected error while creating the payment." }, 500);
+    console.error("create-payment error:", err);
+    return cors({ error: "Unexpected error: " + (err && err.message ? err.message : String(err)) }, 500);
   }
 };
