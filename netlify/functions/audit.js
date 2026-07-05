@@ -1,9 +1,4 @@
 // netlify/functions/audit.js
-//
-// Runs the website audit through Gemini using a server-side API key
-// (env var GEMINI_API_KEY, set in Netlify → Site settings → Environment variables).
-// The browser only ever sends a URL and gets back audit JSON — it never sees the key.
-
 const ALLOWED_ORIGIN = process.env.SITE_URL || "*";
 
 function cors(body, statusCode = 200) {
@@ -19,73 +14,37 @@ function cors(body, statusCode = 200) {
   };
 }
 
-function isValidHttpUrl(value) {
-  try {
-    const u = new URL(value);
-    return u.protocol === "http:" || u.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
+function buildPrompt(url, domain, lang = "en") {
+  return `You are an elite global website auditor and senior full-stack consultant. Analyze the website: ${url} (Domain: ${domain}).
+Provide an extremely thorough, exhaustive, and premium architectural audit suitable for an international enterprise scale. 
+The analysis must be strictly conducted and written in the language corresponding to this code: "${lang}".
 
-function buildPrompt(url, domain) {
-  return `You are an expert website auditor. Your task is to audit the specific website: ${url}
+CRITICAL EXPECTATIONS:
+- Never mention geographical limitations (do not restrict to specific regions). Target a global international audience.
+- The globalScore must be realistic and scientifically justified based on performance, accessibility, SEO, best practices, UX, and security.
+- The content must be highly technical, structured, and contain rich data paragraphs, not brief summaries.
 
-This is a REAL audit. You must analyze this exact domain "${domain}" based on everything you know about it — its industry, typical design patterns, common technical issues for this type of site, and its likely audience.
-
-CRITICAL RULES:
-- Every score must reflect the REAL state of ${domain} specifically
-- Do NOT use generic scores like 70, 75, 80 for everything — vary them based on actual site characteristics
-- The summary must mention the actual domain name and its specific industry/purpose
-- Each category issue must describe problems specific to THIS website, not generic websites
-- Recommendations must reference actual elements of ${domain} (e.g. mention their product pages, contact forms, blog, etc.)
-- Scores should vary significantly between categories (e.g. a restaurant site might score 90 on content but 30 on SEO)
-
-Respond with ONLY a JSON object. No text before or after. No markdown. Start directly with {
+Respond with ONLY a raw valid JSON object. No markdown blocks, no text headers.
 
 {
-  "globalScore": <realistic score 0-100 specific to ${domain}>,
-  "summary": "<2-3 sentences mentioning ${domain} by name, its industry, its main strengths AND specific weaknesses you identified>",
+  "globalScore": <0-100 score>,
+  "summary": "<Deep, comprehensive 4-6 sentence executive analysis detailing precise industrial bottlenecks, architecture flaws, and growth positioning for ${domain}>",
   "categories": [
-    {"name":"SEO","icon":"🔍","score":<realistic score>,"issues":"<specific SEO issues for ${domain}>"},
-    {"name":"Performance","icon":"⚡","score":<realistic score>,"issues":"<specific performance issues>"},
-    {"name":"UX & Design","icon":"🎨","score":<realistic score>,"issues":"<specific UX issues for ${domain}>"},
-    {"name":"Security","icon":"🔒","score":<realistic score>,"issues":"<specific security status for ${domain}>"},
-    {"name":"Content","icon":"📝","score":<realistic score>,"issues":"<specific content issues>"},
-    {"name":"Mobile","icon":"📱","score":<realistic score>,"issues":"<specific mobile issues for ${domain}>"}
+    {"name": "SEO", "icon": "🔍", "score": <score>, "issues": "<Detailed paragraph analyzing crawlability, internationalization tags, Core Web Vitals impact on SERP, and semantic metadata architecture.>"},
+    {"name": "Performance", "icon": "⚡", "score": <score>, "issues": "<Granular breakdown of TTFB, LCP, TBT, code-splitting inefficiencies, rendering bottlenecks, and global CDN latency issues.>"},
+    {"name": "UX & Conversion", "icon": "🎨", "score": <score>, "issues": "<Deep cognitive load analysis, international accessibility compliance (WCAG), interactive element friction, and international checkout/conversion flow holes.>"},
+    {"name": "Security & Trust", "icon": "🔒", "score": <score>, "issues": "<Assessment of SSL implementation depth, HTTP security headers (CSP, HSTS, X-Content-Type-Options), client-side data vectors, and user data privacy compliance.>"},
+    {"name": "Content & Localization", "icon": "📝", "score": <score>, "issues": "<Evaluation of international readability, localization precision, search intent matching, and content layout hierarchical architecture.>"},
+    {"name": "Mobile Responsiveness", "icon": "📱", "score": <score>, "issues": "<Detailed assessment of mobile viewport rendering shift, touch target sizing, dynamic asset scaling, and mobile network performance throttling behaviors.>"}
   ],
   "recommendations": [
-    {"priority":"critical","title":"<specific action title>","description":"<detailed fix referencing actual elements of ${domain}>","category":"SEO"},
-    {"priority":"critical","title":"<specific action title>","description":"<detailed fix with specific technical steps>","category":"Performance"},
-    {"priority":"medium","title":"<specific action title>","description":"<detailed fix referencing ${domain} pages or features>","category":"UX & Design"},
-    {"priority":"medium","title":"<specific action title>","description":"<detailed fix for ${domain} content strategy>","category":"Content"},
-    {"priority":"low","title":"<specific action title>","description":"<enhancement specific to ${domain} industry and audience>","category":"Mobile"},
-    {"priority":"low","title":"<specific action title>","description":"<enhancement for ${domain} long term growth>","category":"Security"}
+    {"priority": "critical", "title": "<High Impact Action>", "description": "<Extremely precise technical fix instructions referencing exact architectural changes required>", "category": "Performance"},
+    {"priority": "critical", "title": "<Critical Setup>", "description": "<Exact configuration adjustments required for global compliance and discoverability>", "category": "SEO"},
+    {"priority": "medium", "title": "<UX Optimization>", "description": "<Actionable layouts or conversion rate optimization adjustments>", "category": "UX & Conversion"},
+    {"priority": "medium", "title": "<Security Hardening>", "description": "<Precise rules or headers to deploy immediately>", "category": "Security & Trust"},
+    {"priority": "low", "title": "<Localization Fine-Tuning>", "description": "<Enhancements for multilingual rendering and cross-border performance optimization>", "category": "Content & Localization"}
   ]
 }`;
-}
-
-function tryRepairJson(raw) {
-  let fixed = raw;
-  let braces = 0;
-  let brackets = 0;
-  for (const ch of fixed) {
-    if (ch === "{") braces++;
-    else if (ch === "}") braces--;
-    else if (ch === "[") brackets++;
-    else if (ch === "]") brackets--;
-  }
-  const last = fixed.trimEnd().slice(-1);
-  if (last !== "}" && last !== "]" && last !== '"') fixed += '"';
-  while (brackets > 0) {
-    fixed += "]";
-    brackets--;
-  }
-  while (braces > 0) {
-    fixed += "}";
-    braces--;
-  }
-  return JSON.parse(fixed);
 }
 
 exports.handler = async (event) => {
@@ -93,64 +52,31 @@ exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return cors({ error: "Method not allowed" }, 405);
 
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return cors({ error: "Server misconfigured: missing GEMINI_API_KEY." }, 500);
-  }
+  if (!apiKey) return cors({ error: "Server missing GEMINI_API_KEY." }, 500);
 
-  let payload;
-  try {
-    payload = JSON.parse(event.body || "{}");
-  } catch {
-    return cors({ error: "Invalid request body." }, 400);
-  }
-
+  let payload = JSON.parse(event.body || "{}");
   const url = (payload.url || "").trim();
-  if (!isValidHttpUrl(url)) {
-    return cors({ error: "Please provide a valid URL starting with http:// or https://" }, 400);
-  }
+  const lang = (payload.lang || "en").trim();
+
+  if (!url.startsWith("http")) return cors({ error: "Invalid URL." }, 400);
 
   const domain = new URL(url).hostname;
-  const prompt = buildPrompt(url, domain);
+  const prompt = buildPrompt(url, domain, lang);
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 4000, responseMimeType: "application/json" },
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      return cors({ error: errData.error?.message || "Audit provider error." }, 502);
-    }
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.15, responseMimeType: "application/json" },
+      }),
+    });
 
     const data = await res.json();
     let txt = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    txt = txt.replace(/```json|```/g, "").trim();
-
-    const jsonStart = txt.indexOf("{");
-    const jsonEnd = txt.lastIndexOf("}");
-    if (jsonStart === -1 || jsonEnd === -1) {
-      return cors({ error: "The audit engine returned an unreadable response. Please try again." }, 502);
-    }
-    txt = txt.slice(jsonStart, jsonEnd + 1);
-    txt = txt.replace(/[\x00-\x1F\x7F]/g, " ").replace(/,\s*}/g, "}").replace(/,\s*]/g, "]");
-
-    let audit;
-    try {
-      audit = JSON.parse(txt);
-    } catch {
-      audit = tryRepairJson(txt);
-    }
-
-    return cors({ audit, url });
+    return cors({ audit: JSON.parse(txt.trim()), url });
   } catch (err) {
-    return cors({ error: "Unexpected error while running the audit." }, 500);
+    return cors({ error: "Audit failed." }, 500);
   }
 };
