@@ -1,15 +1,8 @@
 // netlify/functions/create-payment.js
-//
-// Creates a NOWPayments invoice for the $2 report unlock and records a
-// "pending" order in Netlify Blobs so the IPN webhook and the polling
-// endpoint (check-payment.js) can agree on its status.
-
 const crypto = require("crypto");
-const { normalizeEmail, isValidEmail, addOrderToEmailIndex } = require("./_lib/email-index");
 const { getSafeStore } = require("./_lib/blob-store");
 
-const PRICE_USD = 2;
-const API_BASE = process.env.NOWPAYMENTS_API_BASE || "https://api.nowpayments.io/v1";
+const PRICE_USD = 9.99; // Prix calibré pour absorber les frais de réseau crypto standards
 
 function cors(body, statusCode = 200) {
   return {
@@ -29,28 +22,17 @@ exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return cors({ error: "Method not allowed" }, 405);
 
   const apiKey = process.env.NOWPAYMENTS_API_KEY;
-  const siteUrl = process.env.SITE_URL; // e.g. https://your-site.netlify.app
-  if (!apiKey || !siteUrl) {
-    return cors({ error: "Server misconfigured: missing NOWPAYMENTS_API_KEY or SITE_URL." }, 500);
-  }
+  const siteUrl = process.env.SITE_URL;
+  if (!apiKey || !siteUrl) return cors({ error: "Missing configuration parameters." }, 500);
 
-  let payload;
-  try {
-    payload = JSON.parse(event.body || "{}");
-  } catch {
-    return cors({ error: "Invalid request body." }, 400);
-  }
-
+  let payload = JSON.parse(event.body || "{}");
   const auditedUrl = (payload.url || "").trim();
   const audit = payload.audit || null;
-  const email = normalizeEmail(payload.email);
-  if (!isValidEmail(email)) {
-    return cors({ error: "Please provide a valid email address to receive your access link." }, 400);
-  }
   const orderId = crypto.randomUUID();
 
   try {
-    const invoiceRes = await fetch(`${API_BASE}/invoice`, {
+    // Appel à l'API NOWPayments pour initialiser la facture crypto
+    const invoiceRes = await fetch("https://api.nowpayments.io/v1/invoice", {
       method: "POST",
       headers: {
         "x-api-key": apiKey,
@@ -60,7 +42,7 @@ exports.handler = async (event) => {
         price_amount: PRICE_USD,
         price_currency: "usd",
         order_id: orderId,
-        order_description: `SiteScope Pro — full report unlock${auditedUrl ? " for " + auditedUrl : ""}`,
+        order_description: `Premium International Audit Unlock for ${auditedUrl}`,
         ipn_callback_url: `${siteUrl}/.netlify/functions/ipn-webhook`,
         success_url: `${siteUrl}/?order_id=${orderId}&paid=1`,
         cancel_url: `${siteUrl}/?order_id=${orderId}&canceled=1`,
@@ -69,22 +51,20 @@ exports.handler = async (event) => {
 
     const invoiceData = await invoiceRes.json();
     if (!invoiceRes.ok || !invoiceData.invoice_url) {
-      return cors({ error: invoiceData.message || "Could not create payment invoice." }, 502);
+      return cors({ error: invoiceData.message || "Invoice creation failed." }, 502);
     }
 
+    // Sauvegarde temporaire des données d'audit dans le Blob Store Netlify sous l'ID unique
     const store = getSafeStore("orders");
     await store.setJSON(orderId, {
       status: "pending",
       url: auditedUrl,
       audit,
-      email,
       createdAt: Date.now(),
     });
-    await addOrderToEmailIndex(email, orderId);
 
     return cors({ orderId, invoiceUrl: invoiceData.invoice_url });
   } catch (err) {
-    console.error("create-payment error:", err);
-    return cors({ error: "Unexpected error: " + (err && err.message ? err.message : String(err)) }, 500);
+    return cors({ error: err.message }, 500);
   }
 };
