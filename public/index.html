@@ -1,1160 +1,460 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SiteScope Pro — AI Website Audit for Malaysia &amp; Singapore</title>
-<meta name="description" content="Get an instant AI-powered audit of your website's SEO, performance, UX and security. Free score, full report for $2."/>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap');
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SiteScope Pro — Premium Global AI Website Audit</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
-:root {
-  --bg: #07090F;
-  --surface: #0F1520;
-  --surface2: #151E30;
-  --border: #1A2640;
-  --accent: #4F8EF7;
-  --accent2: #A855F7;
-  --gold: #F59E0B;
-  --text: #E2E8F5;
-  --muted: #5A6A8A;
-  --success: #22C55E;
-  --warning: #F59E0B;
-  --danger: #EF4444;
-  --radius: 12px;
-}
+    :root {
+      --bg: #030712;
+      --surface: #0b0f19;
+      --surface2: #1f293d;
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --gold: #fbbf24;
+      --gold-gradient: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 16px;
+    }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-html { scroll-behavior: smooth; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    
+    .navbar { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 24px 0; 
+      border-bottom: 1px solid var(--border); 
+    }
+    .brand { 
+      font-family: 'Cinzel', serif; 
+      font-size: 22px; 
+      font-weight: 700; 
+      letter-spacing: 2px; 
+      background: var(--accent-gradient); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+    }
+    .lang-selector {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+    }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  min-height: 100vh;
-}
+    .hero { text-align: center; padding: 80px 0 40px; }
+    .hero h1 { font-family: 'Cinzel', serif; font-size: 46px; margin-bottom: 24px; line-height: 1.2; letter-spacing: -0.5px; }
+    .hero p { max-width: 700px; margin: 0 auto 32px; color: var(--muted); font-size: 17px; line-height: 1.6; }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(79,142,247,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 30% at 80% 80%, rgba(168,85,247,0.05) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
+    .audit-container { 
+      background: var(--surface); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius); 
+      padding: 32px; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5); 
+      margin-bottom: 40px; 
+    }
+    .input-group { display: flex; gap: 16px; }
+    input[type="url"] { 
+      flex: 1; 
+      background: rgba(255,255,255,0.02); 
+      border: 1px solid var(--border); 
+      border-radius: 12px; 
+      padding: 18px; 
+      color: #fff; 
+      font-size: 16px; 
+      transition: all 0.3s; 
+    }
+    input[type="url"]:focus { border-color: var(--accent); outline: none; background: rgba(255,255,255,0.05); }
+    
+    .btn { 
+      background: var(--accent-gradient); 
+      border: none; 
+      color: white; 
+      padding: 18px 36px; 
+      border-radius: 12px; 
+      font-weight: 600; 
+      font-size: 16px; 
+      cursor: pointer; 
+      transition: transform 0.2s, opacity 0.2s; 
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
-.wrap-wide { max-width: 1080px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+    /* Results Layout */
+    #resultsBlock { display: none; margin-top: 40px; margin-bottom: 80px; }
+    .score-circle { 
+      width: 140px; 
+      height: 140px; 
+      border-radius: 50%; 
+      border: 6px solid var(--accent); 
+      display: flex; 
+      flex-direction: column;
+      align-items: center; 
+      justify-content: center; 
+      font-size: 44px; 
+      font-weight: 700; 
+      margin: 0 auto 24px; 
+      background: rgba(255,255,255,0.01);
+    }
+    .score-label { font-size: 12px; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; margin-top: -4px; }
+    
+    .summary-box { 
+      background: rgba(99, 102, 241, 0.04); 
+      border-left: 4px solid var(--accent); 
+      padding: 24px; 
+      border-radius: 8px; 
+      margin-top: 32px; 
+      font-size: 16px; 
+      line-height: 1.7; 
+    }
+    
+    .grid-cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 32px; }
+    .card-cat { background: rgba(255,255,255,0.01); border: 1px solid var(--border); padding: 24px; border-radius: 12px; }
+    .card-cat h4 { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; }
+    .card-cat p { font-size: 13.5px; color: var(--muted); margin-top: 12px; line-height: 1.6; }
 
-a { color: inherit; }
+    /* Locked Area and Paywall Section */
+    .locked-area { position: relative; margin-top: 40px; border-radius: var(--radius); overflow: hidden; }
+    .blur-layer { filter: blur(10px); pointer-events: none; user-select: none; opacity: 0.3; }
+    .lock-banner { 
+      position: absolute; 
+      inset: 0; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      background: rgba(3, 7, 18, 0.8); 
+      text-align: center; 
+      padding: 32px; 
+      border: 1px dashed rgba(255,255,255,0.15);
+      border-radius: var(--radius);
+    }
 
-/* ── NAV ── */
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(7,9,15,0.82);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-}
-.nav-inner {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  color: var(--text);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  font-weight: 500;
-}
-.nav-brand .brand-dot {
-  width: 7px; height: 7px;
-  background: var(--accent);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--accent);
-  animation: breathe 3s ease-in-out infinite;
-}
-@keyframes breathe {
-  0%,100% { opacity:1; box-shadow: 0 0 8px var(--accent); }
-  50% { opacity:0.5; box-shadow: 0 0 3px var(--accent); }
-}
-.nav-links {
-  display: flex;
-  gap: 26px;
-  list-style: none;
-  font-size: 13px;
-  color: var(--muted);
-}
-.nav-links a { text-decoration: none; transition: color 0.2s; }
-.nav-links a:hover { color: var(--text); }
-.nav-cta {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 8px;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: border-color 0.2s;
-}
-.nav-cta:hover { border-color: var(--accent); }
-.nav-toggle { display: none; }
-
-@media (max-width: 720px) {
-  .nav-links { display: none; }
-  .nav-toggle {
-    display: block;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    padding: 7px 11px;
-    font-size: 16px;
-  }
-}
-
-/* ── HEADER / HERO ── */
-header.hero { padding: 64px 0 32px; text-align: center; }
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  color: var(--accent);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-bottom: 20px;
-  background: rgba(79,142,247,0.08);
-  border: 1px solid rgba(79,142,247,0.2);
-  padding: 6px 14px;
-  border-radius: 999px;
-}
-h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(30px, 5.5vw, 52px);
-  font-weight: 800;
-  line-height: 1.08;
-  letter-spacing: -0.025em;
-  margin-bottom: 14px;
-}
-h1 em {
-  font-style: normal;
-  background: linear-gradient(120deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.tagline { color: var(--muted); font-size: 15px; max-width: 460px; margin: 0 auto 12px; line-height: 1.65; }
-.hero-note { color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; margin-bottom: 36px; }
-
-/* ── AUDIT BOX ── */
-.audit-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 8px;
-}
-.field-label {
-  font-size: 11px;
-  font-family: 'DM Mono', monospace;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 6px;
-}
-.field-group { margin-bottom: 4px; }
-input[type="text"], input[type="url"] {
-  width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 13px 16px;
-  color: var(--text);
-  font-size: 14px;
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,0.1); }
-input::placeholder { color: var(--muted); }
-.input-row { display: flex; gap: 10px; }
-.input-row input { flex: 1; }
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent), #6366F1);
-  border: none;
-  border-radius: var(--radius);
-  padding: 13px 26px;
-  color: white;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity 0.2s, transform 0.15s;
-}
-.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.form-hint { color: var(--muted); font-size: 11px; margin-top: 10px; font-family: 'DM Mono', monospace; }
-
-/* ── LOADING ── */
-#loading { display: none; text-align: center; padding: 60px 0; }
-#loading.on { display: block; }
-.spin {
-  width: 44px; height: 44px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-  margin: 0 auto 20px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-msg { color: var(--muted); font-size: 13px; font-family: 'DM Mono', monospace; margin-bottom: 6px; }
-.loading-step { color: var(--accent); font-size: 12px; font-family: 'DM Mono', monospace; }
-
-/* ── ERROR ── */
-.error-msg {
-  display: none;
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.25);
-  border-radius: var(--radius);
-  padding: 14px 18px;
-  color: #FCA5A5;
-  font-size: 13px;
-  margin-top: 12px;
-}
-.error-msg.on { display: block; }
-
-/* ── RESULTS ── */
-#results { display: none; padding-top: 28px; }
-#results.on { display: block; }
-
-.score-hero {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 36px 24px;
-  text-align: center;
-  margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
-}
-.score-hero::after {
-  content: '';
-  position: absolute;
-  bottom: -40px; left: 50%;
-  transform: translateX(-50%);
-  width: 280px; height: 140px;
-  background: radial-gradient(ellipse, rgba(79,142,247,0.07), transparent 70%);
-  pointer-events: none;
-}
-.score-url { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 16px; word-break: break-all; }
-.global-score { font-family: 'Syne', sans-serif; font-size: 88px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
-.global-score.good { color: var(--success); }
-.global-score.med  { color: var(--warning); }
-.global-score.bad  { color: var(--danger); }
-.score-verdict { font-size: 15px; color: var(--muted); margin-bottom: 20px; }
-.progress-track { background: var(--border); border-radius: 4px; height: 5px; max-width: 320px; margin: 0 auto; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--danger) 0%, var(--warning) 50%, var(--success) 100%); transition: width 1.2s cubic-bezier(.4,0,.2,1); }
-
-.section-head {
-  font-family: 'Syne', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  margin: 28px 0 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--text);
-}
-.section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-.cats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-bottom: 4px; }
-.cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color 0.2s; }
-.cat-card:hover { border-color: rgba(79,142,247,0.25); }
-.cat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.cat-name { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
-.cat-num { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; }
-.cat-num.good { color: var(--success); }
-.cat-num.med  { color: var(--warning); }
-.cat-num.bad  { color: var(--danger); }
-.cat-track { background: var(--border); border-radius: 3px; height: 3px; overflow: hidden; margin-bottom: 10px; }
-.cat-fill { height: 100%; border-radius: 3px; transition: width 1s ease 0.4s; }
-.cat-fill.good { background: var(--success); }
-.cat-fill.med  { background: var(--warning); }
-.cat-fill.bad  { background: var(--danger); }
-.cat-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
-
-/* ── REPORT LINK BANNER ── */
-.report-link-banner {
-  background: rgba(34,197,94,0.06);
-  border: 1px solid rgba(34,197,94,0.25);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  margin-bottom: 20px;
-  font-size: 13px;
-  color: var(--text);
-}
-.report-link-row { display: flex; gap: 8px; margin-top: 10px; }
-.report-link-row input {
-  flex: 1;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 9px 12px;
-  color: var(--muted);
-  font-size: 12px;
-  font-family: 'DM Mono', monospace;
-}
-.btn-copy {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 9px 16px;
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.btn-copy:hover { border-color: var(--success); }
-
-/* ── LOCKED SECTION ── */
-.locked-section { position: relative; margin-bottom: 20px; }
-.blur-content { filter: blur(6px); user-select: none; pointer-events: none; opacity: 0.6; transition: filter 0.5s, opacity 0.5s; }
-.locked-section.unlocked .blur-content { filter: none; user-select: auto; pointer-events: auto; opacity: 1; }
-.locked-section.unlocked .lock-overlay { display: none; }
-
-.lock-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(180deg, rgba(7,9,15,0) 0%, rgba(7,9,15,0.85) 40%);
-  border-radius: 16px;
-  z-index: 10;
-  padding: 24px;
-  text-align: center;
-}
-.lock-icon { font-size: 36px; margin-bottom: 12px; }
-.lock-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-.lock-desc { color: var(--muted); font-size: 13px; margin-bottom: 20px; max-width: 320px; line-height: 1.6; }
-.lock-whats-inside { display: flex; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; justify-content: center; }
-.lock-feature { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 6px; }
-
-.btn-unlock {
-  background: linear-gradient(135deg, var(--gold), #F97316);
-  border: none;
-  border-radius: var(--radius);
-  padding: 14px 32px;
-  color: white;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 20px rgba(245,158,11,0.3);
-}
-.btn-unlock:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 24px rgba(245,158,11,0.4); }
-.btn-unlock:active { transform: translateY(0); }
-.btn-unlock:disabled { opacity: 0.6; cursor: wait; transform: none; }
-.price-tag { background: rgba(255,255,255,0.2); border-radius: 6px; padding: 2px 8px; font-size: 13px; }
-
-/* Payment modal */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
-.modal-bg.open { display: flex; }
-.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.5); }
-.modal-icon { font-size: 40px; margin-bottom: 16px; }
-.modal-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-.modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 24px; line-height: 1.6; }
-.modal-status {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 16px;
-  font-family: 'DM Mono', monospace;
-}
-.modal-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: breathe 1.4s ease-in-out infinite; }
-.modal-status.paid { color: var(--success); }
-.modal-status.paid .dot { background: var(--success); animation: none; }
-.pay-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 14px;
-  border-radius: var(--radius);
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: opacity 0.2s, transform 0.15s;
-  border: none;
-  background: linear-gradient(135deg, var(--gold), #F97316);
-  color: white;
-  margin-bottom: 12px;
-  width: 100%;
-}
-.pay-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-.pay-btn:disabled { opacity: 0.5; cursor: wait; }
-.modal-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
-.modal-close { margin-top: 16px; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 20px; color: var(--muted); cursor: pointer; font-size: 13px; width: 100%; }
-.modal-close:hover { border-color: var(--muted); }
-
-/* Summary */
-.summary-block { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 20px 22px; font-size: 14px; line-height: 1.75; color: var(--text); }
-
-/* Recs */
-.rec-list { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-.rec-item { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; gap: 14px; align-items: flex-start; }
-.rec-item:last-child { border-bottom: none; }
-.rec-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-.rec-dot.critical { background: var(--danger); box-shadow: 0 0 7px var(--danger); }
-.rec-dot.medium   { background: var(--warning); }
-.rec-dot.low      { background: var(--success); }
-.rec-body { flex: 1; }
-.rec-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
-.rec-desc  { font-size: 12px; color: var(--muted); line-height: 1.55; }
-.rec-tag { display: inline-block; margin-top: 5px; font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 7px; background: var(--border); color: var(--muted); border-radius: 4px; }
-
-/* ── MARKETING SECTIONS ── */
-.section { padding: 72px 0; position: relative; z-index: 1; }
-.section-divider { border-top: 1px solid var(--border); }
-.section-kicker {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-bottom: 12px;
-  text-align: center;
-}
-.section-title {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(24px, 3.6vw, 34px);
-  font-weight: 800;
-  text-align: center;
-  margin-bottom: 14px;
-  letter-spacing: -0.02em;
-}
-.section-sub { color: var(--muted); font-size: 14px; text-align: center; max-width: 560px; margin: 0 auto 44px; line-height: 1.7; }
-
-.value-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
-.value-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
-.value-icon { font-size: 22px; margin-bottom: 14px; }
-.value-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
-.value-text { color: var(--muted); font-size: 13px; line-height: 1.65; }
-
-.cost-panel {
-  background: var(--surface);
-  border: 1px solid rgba(239,68,68,0.2);
-  border-radius: 18px;
-  padding: 8px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-}
-.cost-item { padding: 22px; border-radius: 12px; }
-.cost-num { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; color: var(--danger); margin-bottom: 8px; line-height: 1; }
-.cost-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-.cost-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
-
-.steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-.step-card { text-align: center; padding: 8px; }
-.step-num {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'DM Mono', monospace;
-  color: var(--accent);
-  font-size: 14px;
-  margin: 0 auto 14px;
-}
-.step-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 6px; }
-.step-text { color: var(--muted); font-size: 12.5px; line-height: 1.6; max-width: 230px; margin: 0 auto; }
-
-.cta-band {
-  background: linear-gradient(135deg, rgba(79,142,247,0.1), rgba(168,85,247,0.08));
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 44px 30px;
-  text-align: center;
-}
-.cta-band h3 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 10px; }
-.cta-band p { color: var(--muted); font-size: 14px; margin-bottom: 22px; }
-.cta-band .btn-primary { padding: 14px 32px; font-size: 15px; }
-
-/* ── FOOTER ── */
-footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 40px; }
-.footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; margin-bottom: 36px; }
-.footer-brand { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-.footer-desc { color: var(--muted); font-size: 12.5px; line-height: 1.65; max-width: 260px; }
-.footer-col-title { font-size: 11px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 14px; }
-.footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.footer-links a { color: var(--text); text-decoration: none; font-size: 13px; opacity: 0.85; }
-.footer-links a:hover { opacity: 1; color: var(--accent); }
-.footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
-
-@media (max-width: 720px) {
-  .footer-grid { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 500px) {
-  .input-row { flex-direction: column; }
-  .btn-primary { width: 100%; }
-  .global-score { font-size: 68px; }
-  .footer-grid { grid-template-columns: 1fr; }
-}
-</style>
+    /* Unlocked Content Items */
+    .rec-item {
+      background: rgba(255,255,255,0.01); 
+      border: 1px solid var(--border); 
+      padding: 20px; 
+      border-radius: 10px; 
+      margin-bottom: 16px; 
+    }
+    .badge-priority {
+      font-size: 11px; 
+      text-transform: uppercase; 
+      font-weight: 700; 
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+  </style>
+  <!-- Generateur PDF Client Premium -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="navbar">
-  <div class="nav-inner">
-    <a href="#top" class="nav-brand"><span class="brand-dot"></span>SiteScope Pro</a>
-    <ul class="nav-links">
-      <li><a href="#audit">Free Audit</a></li>
-      <li><a href="#why-performance">Why It Matters</a></li>
-      <li><a href="#cost">Cost of a Bad Site</a></li>
-      <li><a href="#how-it-works">How It Works</a></li>
-      <li><a href="#pricing">Pricing</a></li>
-    </ul>
-    <a href="#audit" class="nav-cta">Audit my site →</a>
-  </div>
-</nav>
-
-<!-- PAYMENT MODAL -->
-<div class="modal-bg" id="payModal">
-  <div class="modal">
-    <div class="modal-icon">🔓</div>
-    <div class="modal-title">Unlock Your Full Report</div>
-    <div class="modal-sub">Get the complete audit — executive summary, detailed issues, and a prioritized action plan — for a one-time payment of <strong>$2</strong>, paid securely in crypto via NOWPayments.</div>
-
-    <div id="modalIdle">
-      <div class="field-group" style="text-align:left; margin-bottom:14px;">
-        <div class="field-label">Your email (to receive your access link)</div>
-        <input type="text" id="payerEmail" placeholder="you@company.com"/>
-      </div>
-      <button class="pay-btn" id="payBtn" onclick="beginPayment()">💳 Pay $2 with NOWPayments</button>
-      <div class="modal-note">You'll be redirected to a secure NOWPayments checkout page. Once your payment is confirmed, we'll email your access link — you'll need this same email to reopen the report later.</div>
-    </div>
-
-    <div id="modalWaiting" style="display:none;">
-      <div class="modal-status" id="modalStatusBox"><span class="dot"></span><span id="modalStatusText">Waiting for payment confirmation…</span></div>
-      <div class="modal-note">Didn't get redirected? <a href="#" id="reopenCheckout" style="color:var(--accent);">Reopen the checkout page</a>.</div>
-    </div>
-
-    <button class="modal-close" onclick="closeModal()">Cancel</button>
-  </div>
-</div>
-
-<div id="top"></div>
-
 <div class="wrap">
+  <nav class="navbar">
+    <div class="brand">SITESCOPE PRO</div>
+    <select class="lang-selector" id="langSelect" onchange="changeLanguage()">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="es">Español</option>
+      <option value="de">Deutsch</option>
+      <option value="it">Italiano</option>
+    </select>
+  </nav>
+
   <header class="hero">
-    <div class="eyebrow">✨ AI-Powered Website Audit</div>
-    <h1>Your website audit,<br><em>powered by AI</em></h1>
-    <p class="tagline">Instant SEO, performance, UX &amp; security analysis for businesses in Malaysia &amp; Singapore.</p>
-    <p class="hero-note">No signup. No credit card to see your score. Full report for $2.</p>
+    <h1 id="lbl-title">Deep AI-Driven Global Website Auditing</h1>
+    <p id="lbl-subtitle">Instantly diagnose structural bottlenecks, architectural inefficiencies, advanced SEO vulnerabilities, and localization optimization parameters on a worldwide scale.</p>
   </header>
 
-  <!-- AUDIT FORM -->
-  <div class="audit-card" id="audit">
-    <div class="field-group">
-      <div class="field-label">Website to audit</div>
-      <div class="input-row">
-        <input type="text" id="urlInput" placeholder="https://example.com.my"/>
-        <button class="btn-primary" id="auditBtn" onclick="startAudit()">Audit Now</button>
-      </div>
-      <div class="form-hint">Takes about 15–20 seconds.</div>
-    </div>
-    <div class="error-msg" id="errBox"></div>
-  </div>
-
-  <!-- EMAIL GATE — shown when opening a bookmarked ?order_id= link -->
-  <div class="audit-card" id="emailGateCard" style="display:none;">
-    <div class="field-group">
-      <div class="field-label">🔒 Confirm your email to view this report</div>
-      <div class="input-row">
-        <input type="text" id="gateEmail" placeholder="you@company.com"/>
-        <button class="btn-primary" id="gateBtn" onclick="submitGateEmail()">View report</button>
-      </div>
-      <div class="form-hint">Use the same email you entered when you unlocked this report.</div>
-    </div>
-    <div class="error-msg" id="gateErr"></div>
-    <div class="form-hint" style="margin-top:10px;"><a href="#" onclick="document.getElementById('gateForgot').style.display='block'; return false;" style="color:var(--accent);">Forgot which email you used?</a></div>
-    <div id="gateForgot" style="display:none; margin-top:14px;">
-      <div class="form-hint" style="margin-bottom:8px;">Forgot which email you used? Enter it below and we'll resend the link if it matches a report.</div>
-      <div class="input-row">
-        <input type="text" id="forgotEmail" placeholder="you@company.com"/>
-        <button class="btn-primary" id="forgotBtn" onclick="submitForgotEmail()">Send my link</button>
-      </div>
-      <div class="error-msg" id="forgotMsg" style="color:var(--success); border-color:rgba(34,197,94,0.25); background:rgba(34,197,94,0.06);"></div>
+  <div class="audit-container">
+    <div class="input-group">
+      <input type="url" id="targetUrl" placeholder="https://example.com" required/>
+      <button class="btn" id="lbl-btn" onclick="executeAudit()">Analyze Website</button>
     </div>
   </div>
 
-  <!-- LOADING -->
-  <div id="loading">
-    <div class="spin"></div>
-    <div class="loading-msg">Analyzing website...</div>
-    <div class="loading-step" id="stepTxt">→ Reading structure &amp; content</div>
-  </div>
-
-  <!-- RESULTS -->
-  <div id="results">
-    <div class="score-hero">
-      <div class="score-url" id="auditedUrl"></div>
-      <div class="global-score" id="gScore">—</div>
-      <div class="score-verdict" id="gVerdict"></div>
-      <div class="progress-track"><div class="progress-fill" id="gBar" style="width:0%"></div></div>
-    </div>
-
-    <div class="section-head">Category Scores</div>
-    <div class="cats-grid" id="catsGrid"></div>
-
-    <div class="report-link-banner" id="reportLinkBanner" style="display:none;">
-      <span>🔖 This link is yours to keep — bookmark it. We've also emailed it to you: reopening it will ask for the same email address to confirm it's you.</span>
-      <div class="report-link-row">
-        <input type="text" id="reportLinkInput" readonly onclick="this.select()"/>
-        <button class="btn-copy" id="copyLinkBtn" onclick="copyReportLink()">Copy</button>
-      </div>
-    </div>
-
-    <div class="locked-section" id="lockedBlock">
-      <div class="blur-content">
-        <div class="section-head">Executive Summary</div>
-        <div class="summary-block" id="summaryBlock"></div>
-        <div class="section-head" style="margin-top:28px;">Action Plan</div>
-        <div class="rec-list" id="recList"></div>
-      </div>
-      <div class="lock-overlay" id="lockOverlay">
-        <div class="lock-icon">🔒</div>
-        <div class="lock-title">Full Report Locked</div>
-        <div class="lock-desc">Your score and categories are free. Unlock the complete audit to see your action plan and full recommendations.</div>
-        <div class="lock-whats-inside">
-          <div class="lock-feature">📋 Executive Summary</div>
-          <div class="lock-feature">🎯 Priority Action Plan</div>
-          <div class="lock-feature">🔍 Detailed Analysis</div>
-          <div class="lock-feature">📈 Growth Tips</div>
+  <!-- ZONE D'AFFICHAGE DES RÉSULTATS -->
+  <div id="resultsBlock">
+    <!-- Conteneur ciblé par html2pdf -->
+    <div id="pdfContent" style="padding: 10px;">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h2 id="pdf-url-title" style="margin-bottom: 16px; font-family:'Cinzel', serif; font-size: 28px; color: #fff;"></h2>
+        <div class="score-circle">
+          <span id="scoreValue">0</span>
+          <span class="score-label">Score</span>
         </div>
-        <button class="btn-unlock" onclick="openModal()">🔓 Unlock Full Report <span class="price-tag">$2</span></button>
       </div>
+
+      <div class="summary-box" id="summaryContainer"></div>
+      <div class="grid-cats" id="categoriesContainer"></div>
+
+      <!-- Section Verrouillée (Paywall) -->
+      <div class="locked-area" id="lockSection">
+        <div class="blur-layer">
+          <h3 style="margin-bottom: 10px;">Detailed Action Plan & Technical Remedies</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Core architecture parameters must be modified instantly to avoid server performance drop across edge nodes.</p>
+        </div>
+        <div class="lock-banner">
+          <h3 style="margin-bottom: 12px; font-family: 'Cinzel', serif; font-size: 22px;" id="lbl-lock-title">Unlock Premium Architectural Report</h3>
+          <p style="margin-bottom: 24px; max-width: 550px; color: var(--muted); font-size: 14.5px; line-height: 1.5;" id="lbl-lock-desc">Access exhaustive code structural reviews, specialized recommendations, and download your exportable client PDF report instantly for $9.99.</p>
+          <button class="btn" style="background: var(--gold-gradient); color: #000; font-weight: 700;" onclick="triggerPayment()" id="lbl-pay-btn">Unlock Full Audit ($9.99)</button>
+        </div>
+      </div>
+      
+      <!-- Section Débloquée (Masquée par défaut) -->
+      <div id="unlockedData" style="display: none; margin-top: 40px;">
+        <h3 style="margin-bottom: 24px; font-family: 'Cinzel', serif; border-bottom: 1px solid var(--border); padding-bottom: 12px; font-size: 22px;" id="lbl-plan-title">Prioritized Structural Remedies</h3>
+        <div id="recsContainer"></div>
+      </div>
+    </div>
+
+    <!-- Actions post-déverrouillage -->
+    <div style="text-align: center; margin-top: 40px; display: none;" id="downloadActionBlock">
+      <button class="btn" style="background: var(--success);" onclick="downloadPdfReport()" id="lbl-dl-btn">Download PDF Report</button>
     </div>
   </div>
 </div>
-
-<!-- WHY PERFORMANCE MATTERS -->
-<div class="section section-divider" id="why-performance">
-  <div class="wrap-wide">
-    <div class="section-kicker">Why it matters</div>
-    <h2 class="section-title">A fast, well-built site is a growth channel</h2>
-    <p class="section-sub">Your website is often the first — and only — impression a customer forms of your business. In competitive markets like Malaysia and Singapore, small technical gaps translate directly into lost customers.</p>
-    <div class="value-grid">
-      <div class="value-card">
-        <div class="value-icon">🔍</div>
-        <div class="value-title">Better search visibility</div>
-        <div class="value-text">Search engines favor sites with clean structure, fast load times, and mobile-friendly layouts. Fixing technical SEO issues helps the right customers find you before they find a competitor.</div>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">⚡</div>
-        <div class="value-title">Visitors who actually stay</div>
-        <div class="value-text">People decide whether to stay on a page within seconds. A site that loads quickly and feels responsive keeps visitors engaged long enough to explore what you offer.</div>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">🛒</div>
-        <div class="value-title">More completed actions</div>
-        <div class="value-text">Clear navigation, obvious calls to action, and a smooth checkout or contact flow are what turn browsing into inquiries, bookings, or sales.</div>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">🔒</div>
-        <div class="value-title">Trust at first glance</div>
-        <div class="value-text">A valid HTTPS certificate, working forms, and a modern design signal that your business is legitimate and worth doing business with.</div>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">📱</div>
-        <div class="value-title">A mobile-first audience</div>
-        <div class="value-text">Most visitors across Southeast Asia browse on mobile first. A site that isn't built mobile-first is turning away the majority of its traffic.</div>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">📊</div>
-        <div class="value-title">Compounding advantage</div>
-        <div class="value-text">Performance improvements stack over time — better rankings bring more traffic, which a well-converting site turns into more customers, funding further improvements.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- COST OF A BAD SITE -->
-<div class="section section-divider" id="cost">
-  <div class="wrap-wide">
-    <div class="section-kicker">The other side</div>
-    <h2 class="section-title">What an underperforming website costs you</h2>
-    <p class="section-sub">Most business owners never see the visitors who leave — they just see the traffic numbers, not the reasons people didn't convert.</p>
-    <div class="cost-panel">
-      <div class="cost-item">
-        <div class="cost-num">👋</div>
-        <div class="cost-label">Silent bounces</div>
-        <div class="cost-text">A slow-loading page loses visitors before they've read a single word — and most never come back to try again.</div>
-      </div>
-      <div class="cost-item">
-        <div class="cost-num">📉</div>
-        <div class="cost-label">Invisible in search</div>
-        <div class="cost-text">Missing titles, broken meta tags, and poor structure keep your site buried below competitors who fixed theirs.</div>
-      </div>
-      <div class="cost-item">
-        <div class="cost-num">🚪</div>
-        <div class="cost-label">Confused visitors leave</div>
-        <div class="cost-text">Unclear navigation and buried contact forms mean interested customers give up instead of reaching out.</div>
-      </div>
-      <div class="cost-item">
-        <div class="cost-num">⚠️</div>
-        <div class="cost-label">Trust erodes fast</div>
-        <div class="cost-text">An expired certificate or a dated, broken layout makes visitors question whether your business is still active — or safe to buy from.</div>
-      </div>
-      <div class="cost-item">
-        <div class="cost-num">📵</div>
-        <div class="cost-label">Mobile friction</div>
-        <div class="cost-text">Tiny buttons, unreadable text, and layouts that don't adapt to phones frustrate the majority of your visitors on their first visit.</div>
-      </div>
-      <div class="cost-item">
-        <div class="cost-num">🏁</div>
-        <div class="cost-label">Ceding ground to competitors</div>
-        <div class="cost-text">Every week these issues go unfixed is a week a competitor's better-optimized site keeps winning the customers you could have had.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- HOW IT WORKS -->
-<div class="section section-divider" id="how-it-works">
-  <div class="wrap">
-    <div class="section-kicker">Simple by design</div>
-    <h2 class="section-title">From URL to action plan in under a minute</h2>
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-num">1</div>
-        <div class="step-title">Paste your URL</div>
-        <div class="step-text">No signup, no API key, no technical setup required.</div>
-      </div>
-      <div class="step-card">
-        <div class="step-num">2</div>
-        <div class="step-title">Get your free score</div>
-        <div class="step-text">See your global score and a breakdown across 6 categories instantly.</div>
-      </div>
-      <div class="step-card">
-        <div class="step-num">3</div>
-        <div class="step-title">Unlock the full report</div>
-        <div class="step-text">Pay $2 to reveal the executive summary and your prioritized action plan.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PRICING / CTA -->
-<div class="section section-divider" id="pricing">
-  <div class="wrap">
-    <div class="cta-band">
-      <h3>See what's really slowing your site down</h3>
-      <p>Free score and category breakdown. Full report with fixes for just $2.</p>
-      <a href="#audit" class="btn-primary" style="text-decoration:none; display:inline-block;">Run my free audit</a>
-    </div>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer>
-  <div class="wrap-wide">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-brand"><span class="brand-dot"></span>SiteScope Pro</div>
-        <div class="footer-desc">AI-powered website audits for SEO, performance, UX and security — built for businesses in Malaysia &amp; Singapore.</div>
-      </div>
-      <div>
-        <div class="footer-col-title">Product</div>
-        <ul class="footer-links">
-          <li><a href="#audit">Free Audit</a></li>
-          <li><a href="#pricing">Pricing</a></li>
-          <li><a href="#how-it-works">How It Works</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="footer-col-title">Learn</div>
-        <ul class="footer-links">
-          <li><a href="#why-performance">Why Performance Matters</a></li>
-          <li><a href="#cost">Cost of a Bad Site</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="footer-col-title">Company</div>
-        <ul class="footer-links">
-          <li><a href="mailto:hello@sitescopepro.com">Contact</a></li>
-          <li><a href="#top">Back to top</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© <span id="year"></span> SiteScope Pro. All rights reserved.</span>
-      <span>Payments processed securely via NOWPayments.</span>
-    </div>
-  </div>
-</footer>
 
 <script>
-document.getElementById('year').textContent = new Date().getFullYear();
+// Dictionnaire d'internationalisation complet (5 langues)
+const dictionary = {
+  en: {
+    title: "Deep AI-Driven Global Website Auditing",
+    subtitle: "Instantly diagnose structural bottlenecks, architectural inefficiencies, advanced SEO vulnerabilities, and localization optimization parameters on a worldwide scale.",
+    btn: "Analyze Website",
+    analyzing: "Analyzing...",
+    lockTitle: "Unlock Premium Architectural Report",
+    lockDesc: "Access exhaustive code structural reviews, specialized recommendations, and download your exportable client PDF report instantly for $9.99.",
+    payBtn: "Unlock Full Audit ($9.99)",
+    waitingPayment: "Waiting for Crypto Confirmation...",
+    planTitle: "Prioritized Structural Remedies",
+    dlBtn: "Download PDF & Purge Server Cache"
+  },
+  fr: {
+    title: "Audit Web Global par IA de Pointe",
+    subtitle: "Diagnostiquez instantanément les goulots d'étranglement structurels, les inefficacités d'architecture, les vulnérabilités SEO et les paramètres de localisation à l'échelle internationale.",
+    btn: "Analyser le Site",
+    analyzing: "Analyse en cours...",
+    lockTitle: "Débloquer le Rapport Architectural Premium",
+    lockDesc: "Accédez aux revues de code complètes, aux recommandations stratégiques prioritaires, et téléchargez votre rapport client au format PDF pour 9,99 $.",
+    payBtn: "Débloquer l'Audit Complet (9,99 $)",
+    waitingPayment: "En attente de confirmation Crypto...",
+    planTitle: "Remèdes Structurels Prioritaires",
+    dlBtn: "Télécharger le PDF & Purger le Cache Serveur"
+  },
+  es: {
+    title: "Auditoría Web Global Impulsada por IA",
+    subtitle: "Diagnostique problemas de infraestructura, ineficiencias de código, vulnerabilidades SEO avanzadas y parámetros de rendimiento internacional en segundos.",
+    btn: "Analizar Sitio Web",
+    analyzing: "Analizando...",
+    lockTitle: "Desbloquear Informe Arquitectónico Premium",
+    lockDesc: "Obtenga revisiones exhaustivas de código, soluciones de ingeniería aplicadas y descargue su informe PDF corporativo de inmediato por $9.99.",
+    payBtn: "Desbloquear Audit Completo ($9.99)",
+    waitingPayment: "Esperando confirmación de la Red Crypto...",
+    planTitle: "Remedios Estructurales Prioritarios",
+    dlBtn: "Descargar PDF y Eliminar Caché del Servidor"
+  },
+  de: {
+    title: "Globales Website-Auditing durch KI",
+    subtitle: "Analysieren Sie sofort strukturelle Engpässe, Code-Ineffizienzen, SEO-Schwachstellen und Optimierungsparameter für weltweite Märkte.",
+    btn: "Website Analysieren",
+    analyzing: "Analyse läuft...",
+    lockTitle: "Premium-Architekturbericht Freischalten",
+    lockDesc: "Erhalten Sie umfassende Code-Analysen, detaillierte Optimierungspläne und laden Sie Ihren exportierbaren PDF-Bericht sofort für 9,99 $ herunter.",
+    payBtn: "Vollständiges Audit Freischalten ($9.99)",
+    waitingPayment: "Warten auf Krypto-Bestätigung...",
+    planTitle: "Priorisierte Strukturelle Maßnahmen",
+    dlBtn: "PDF Herunterladen & Server-Cache Löschen"
+  },
+  it: {
+    title: "Audit di Siti Web Globali con IA",
+    subtitle: "Identifica istantaneamente colli di bottiglia strutturali, inefficienze dell'architettura, vulnerabilità SEO avanzate e parametri di localizzazione nel mondo.",
+    btn: "Analizza il Sito",
+    analyzing: "Analisi in corso...",
+    lockTitle: "Sblocca il Rapporto Architetturale Premium",
+    lockDesc: "Accedi a revisioni complete del codice, soluzioni tecniche avanzate e scarica istantaneamente il tuo rapporto PDF aziendale per $9.99.",
+    payBtn: "Sblocca l'Audit Completo ($9.99)",
+    waitingPayment: "In attesa di conferma Crypto...",
+    planTitle: "Rimedi Strutturali Prioritari",
+    dlBtn: "Scarica il PDF e Cancella la Sessione"
+  }
+};
 
-// ── LOADING STEPS ──
-const STEPS = [
-  '→ Reading structure & content',
-  '→ Analyzing SEO signals',
-  '→ Evaluating page speed indicators',
-  '→ Checking UX & mobile design',
-  '→ Assessing security posture',
-  '→ Generating recommendations'
-];
-let stepI = 0, stepTimer;
-function startSteps() {
-  stepI = 0;
-  document.getElementById('stepTxt').textContent = STEPS[0];
-  stepTimer = setInterval(() => {
-    stepI = (stepI + 1) % STEPS.length;
-    document.getElementById('stepTxt').textContent = STEPS[stepI];
-  }, 1500);
+let currentLang = "en";
+let currentAudit = null;
+let currentOrderId = null;
+let targetUrlStr = "";
+
+function changeLanguage() {
+  currentLang = document.getElementById("langSelect").value;
+  const dict = dictionary[currentLang];
+  
+  document.getElementById("lbl-title").textContent = dict.title;
+  document.getElementById("lbl-subtitle").textContent = dict.subtitle;
+  if (document.getElementById("lbl-btn").textContent !== dictionary[currentLang].analyzing) {
+    document.getElementById("lbl-btn").textContent = dict.btn;
+  }
+  document.getElementById("lbl-lock-title").textContent = dict.lockTitle;
+  document.getElementById("lbl-lock-desc").textContent = dict.lockDesc;
+  if (!document.getElementById("lbl-pay-btn").disabled) {
+    document.getElementById("lbl-pay-btn").textContent = dict.payBtn;
+  }
+  document.getElementById("lbl-plan-title").textContent = dict.planTitle;
+  document.getElementById("lbl-dl-btn").textContent = dict.dlBtn;
 }
 
-// ── SCORE HELPERS ──
-function sc(n) { return n >= 70 ? 'good' : n >= 40 ? 'med' : 'bad'; }
-function verdict(n) {
-  if (n >= 85) return 'Excellent — your site is well optimized';
-  if (n >= 70) return 'Good — minor improvements will help';
-  if (n >= 50) return 'Average — several issues need attention';
-  if (n >= 30) return 'Below average — significant fixes needed';
-  return 'Poor — critical issues require immediate action';
-}
-
-let currentAuditUrl = '';
-let currentAuditData = null;
-
-// ── AUDIT (calls the serverless function; no API key in the browser) ──
-async function startAudit() {
-  const url = document.getElementById('urlInput').value.trim();
-  const err = document.getElementById('errBox');
-  err.classList.remove('on'); err.textContent = '';
-
-  if (!url) { err.textContent = 'Please enter a website URL.'; err.classList.add('on'); return; }
-  if (!/^https?:\/\/.+\..+/.test(url)) { err.textContent = 'Enter a valid URL starting with https://'; err.classList.add('on'); return; }
-
-  currentAuditUrl = url;
-  document.getElementById('auditBtn').disabled = true;
-  document.getElementById('loading').classList.add('on');
-  document.getElementById('results').classList.remove('on');
-  document.getElementById('lockedBlock').classList.remove('unlocked');
-  startSteps();
+async function executeAudit() {
+  const urlInput = document.getElementById("targetUrl");
+  const btn = document.getElementById("lbl-btn");
+  let url = urlInput.value.trim();
+  
+  if(!url) return alert("URL required");
+  if(!url.startsWith("http")) url = "https://" + url;
+  
+  targetUrlStr = url;
+  btn.disabled = true;
+  btn.textContent = dictionary[currentLang].analyzing;
 
   try {
     const res = await fetch('/.netlify/functions/audit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
+      body: JSON.stringify({ url, lang: currentLang })
     });
+    
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Audit failed. Please try again.');
-    render(data.audit, data.url);
-  } catch (e) {
-    clearInterval(stepTimer);
-    document.getElementById('loading').classList.remove('on');
-    document.getElementById('auditBtn').disabled = false;
-    err.textContent = 'Error: ' + (e.message || 'Something went wrong. Please try again.');
-    err.classList.add('on');
+    if(data.error) throw new Error(data.error);
+    
+    currentAudit = data.audit;
+    renderResults(data.audit, url);
+  } catch(err) {
+    alert("Audit Error: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = dictionary[currentLang].btn;
   }
 }
 
-function render(a, url) {
-  clearInterval(stepTimer);
-  currentAuditData = a;
-  currentAuditUrl = url;
-  document.getElementById('loading').classList.remove('on');
-  document.getElementById('auditBtn').disabled = false;
+function renderResults(audit, url) {
+  document.getElementById("pdf-url-title").textContent = url.replace('https://','').replace('http://','');
+  document.getElementById("scoreValue").textContent = audit.globalScore;
+  document.getElementById("summaryContainer").textContent = audit.summary;
+  
+  document.getElementById("categoriesContainer").innerHTML = audit.categories.map(c => `
+    <div class="card-cat">
+      <h4><span>${c.icon}</span> <span>${c.name}</span> <span style="margin-left:auto; color:var(--accent);">${c.score}/100</span></h4>
+      <p>${c.issues}</p>
+    </div>
+  `).join('');
 
-  const n = a.globalScore;
-  const cls = sc(n);
-  document.getElementById('auditedUrl').textContent = url;
-  const gs = document.getElementById('gScore');
-  gs.textContent = n; gs.className = 'global-score ' + cls;
-  document.getElementById('gVerdict').textContent = verdict(n);
-  setTimeout(() => { document.getElementById('gBar').style.width = n + '%'; }, 80);
-
-  document.getElementById('catsGrid').innerHTML = a.categories.map(c => {
-    const cc = sc(c.score);
-    return `<div class="cat-card">
-      <div class="cat-top">
-        <div class="cat-name">${c.icon} ${c.name}</div>
-        <div class="cat-num ${cc}">${c.score}</div>
-      </div>
-      <div class="cat-track"><div class="cat-fill ${cc}" style="width:${c.score}%"></div></div>
-      <div class="cat-text">${c.issues}</div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('summaryBlock').textContent = a.summary;
-
-  document.getElementById('recList').innerHTML = a.recommendations.map(r => `
-    <div class="rec-item">
-      <div class="rec-dot ${r.priority}"></div>
-      <div class="rec-body">
-        <div class="rec-title">${r.title}</div>
-        <div class="rec-desc">${r.description}</div>
-        <span class="rec-tag">${r.category}</span>
-      </div>
-    </div>`).join('');
-
-  document.getElementById('results').classList.add('on');
-  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById("lockSection").style.display = "block";
+  document.getElementById("unlockedData").style.display = "none";
+  document.getElementById("downloadActionBlock").style.display = "none";
+  document.getElementById("resultsBlock").style.display = "block";
 }
 
-// ── PAYMENT (NOWPayments) ──
-let currentOrderId = null;
-let currentPayerEmail = null;
-let pollTimer = null;
-let checkoutWindow = null;
+async function triggerPayment() {
+  const payBtn = document.getElementById("lbl-pay-btn");
+  payBtn.disabled = true;
+  payBtn.textContent = dictionary[currentLang].waitingPayment;
 
-function openModal() {
-  document.getElementById('payModal').classList.add('open');
-  document.getElementById('modalIdle').style.display = 'block';
-  document.getElementById('modalWaiting').style.display = 'none';
-}
-function closeModal() {
-  document.getElementById('payModal').classList.remove('open');
-  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-}
-
-async function beginPayment() {
-  const emailInput = document.getElementById('payerEmail');
-  const email = emailInput.value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    emailInput.style.borderColor = 'var(--danger)';
-    emailInput.focus();
-    return;
-  }
-  emailInput.style.borderColor = '';
-
-  const btn = document.getElementById('payBtn');
-  btn.disabled = true;
-  btn.textContent = 'Creating secure checkout…';
   try {
     const res = await fetch('/.netlify/functions/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: currentAuditUrl, audit: currentAuditData, email })
+      body: JSON.stringify({ url: targetUrlStr, audit: currentAudit })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Could not start payment.');
+    if(data.error) throw new Error(data.error);
 
     currentOrderId = data.orderId;
-    currentPayerEmail = email;
-    checkoutWindow = window.open(data.invoiceUrl, '_blank');
-
-    document.getElementById('modalIdle').style.display = 'none';
-    document.getElementById('modalWaiting').style.display = 'block';
-    document.getElementById('reopenCheckout').href = data.invoiceUrl;
-    document.getElementById('reopenCheckout').onclick = (e) => {
-      e.preventDefault();
-      window.open(data.invoiceUrl, '_blank');
-    };
-
-    startPolling(currentOrderId);
-  } catch (e) {
-    alert('Payment error: ' + (e.message || 'Please try again.'));
-    btn.disabled = false;
-    btn.textContent = '💳 Pay $2 with NOWPayments';
-  }
-}
-
-function startPolling(orderId) {
-  if (pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(async () => {
-    try {
-      const res = await fetch('/.netlify/functions/check-payment?orderId=' + encodeURIComponent(orderId));
-      const data = await res.json();
-      if (data.status === 'paid') {
-        clearInterval(pollTimer);
-        pollTimer = null;
-        unlockReport();
+    // Ouvre la facture NOWPayments (Bitcoin, Eth, USDT...) dans un nouvel onglet
+    window.open(data.invoiceUrl, '_blank');
+    
+    // Boucle de vérification automatique du statut de l'invoice
+    const interval = setInterval(async () => {
+      try {
+        const check = await fetch(`/.netlify/functions/check-payment?orderId=${currentOrderId}`);
+        const statusData = await check.json();
+        if(statusData.status === 'paid' || statusData.status === 'confirmed') {
+          clearInterval(interval);
+          revealRecommendations();
+        }
+      } catch(e) {
+        console.error("Payment checking loop error", e);
       }
-    } catch { /* keep polling */ }
-  }, 3000);
-}
+    }, 5000);
 
-// Reload a report from a bookmarked/shared link: ?order_id=xxx
-// The audit content itself is stored server-side (Netlify Blobs), keyed by
-// orderId, but get-report.js only returns it if the email matches the one
-// used to unlock the report — so the link alone isn't enough.
-let pendingGateOrderId = null;
-
-function showEmailGate(orderId) {
-  pendingGateOrderId = orderId;
-  document.getElementById('audit').style.display = 'none';
-  document.getElementById('emailGateCard').style.display = 'block';
-  document.getElementById('gateEmail').focus();
-}
-
-async function submitGateEmail() {
-  const emailInput = document.getElementById('gateEmail');
-  const err = document.getElementById('gateErr');
-  const email = emailInput.value.trim();
-  err.classList.remove('on'); err.textContent = '';
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    err.textContent = 'Please enter a valid email address.';
-    err.classList.add('on');
-    return;
-  }
-
-  const btn = document.getElementById('gateBtn');
-  btn.disabled = true;
-  btn.textContent = 'Checking…';
-
-  try {
-    const res = await fetch(
-      `/.netlify/functions/get-report?orderId=${encodeURIComponent(pendingGateOrderId)}&email=${encodeURIComponent(email)}`
-    );
-    const data = await res.json();
-
-    if (res.status === 403 || res.status === 401) {
-      err.textContent = "That email doesn't match this report link.";
-      err.classList.add('on');
-      document.getElementById('gateForgot').style.display = 'block';
-      return;
-    }
-    if (!res.ok || !data.audit) {
-      err.textContent = data.error || 'Report not found.';
-      err.classList.add('on');
-      return;
-    }
-
-    currentOrderId = pendingGateOrderId;
-    currentPayerEmail = email;
-    document.getElementById('emailGateCard').style.display = 'none';
-    document.getElementById('audit').style.display = 'block';
-    render(data.audit, data.url);
-
-    if (data.status === 'paid') {
-      unlockReportSilently(pendingGateOrderId);
-    } else {
-      openModal();
-      document.getElementById('modalIdle').style.display = 'none';
-      document.getElementById('modalWaiting').style.display = 'block';
-      startPolling(pendingGateOrderId);
-    }
-  } catch {
-    err.textContent = 'Something went wrong. Please try again.';
-    err.classList.add('on');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'View report';
+  } catch(err) {
+    alert("Payment init failed: " + err.message);
+    payBtn.disabled = false;
+    payBtn.textContent = dictionary[currentLang].payBtn;
   }
 }
 
-async function submitForgotEmail() {
-  const emailInput = document.getElementById('forgotEmail');
-  const msg = document.getElementById('forgotMsg');
-  const email = emailInput.value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+function revealRecommendations() {
+  document.getElementById("lockSection").style.display = "none";
+  document.getElementById("unlockedData").style.display = "block";
+  document.getElementById("downloadActionBlock").style.display = "block";
+  
+  document.getElementById("recsContainer").innerHTML = currentAudit.recommendations.map(r => `
+    <div class="rec-item">
+      <span class="badge-priority" style="${r.priority === 'critical' ? '' : 'background:rgba(245,158,11,0.1); color:var(--gold);'}">[${r.priority}] — ${r.category}</span>
+      <h5 style="font-size:16px; margin-bottom:8px; color:#fff;">${r.title}</h5>
+      <p style="font-size:13.5px; color:var(--muted); line-height:1.5;">${r.description}</p>
+    </div>
+  `).join('');
+}
 
-  const btn = document.getElementById('forgotBtn');
-  btn.disabled = true;
-  btn.textContent = 'Sending…';
-  try {
-    const res = await fetch('/.netlify/functions/resend-link', {
+function downloadPdfReport() {
+  const element = document.getElementById('pdfContent');
+  const opt = {
+    margin:       0.4,
+    filename:     `SiteScope_Pro_Audit_${document.getElementById("pdf-url-title").textContent}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, backgroundColor: '#030712', useCORS: true },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(element).save().then(async () => {
+    // Suppression immédiate et purge du rapport côté serveur suite au téléchargement
+    await fetch('/.netlify/functions/delete-report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ orderId: currentOrderId })
     });
-    const data = await res.json();
-    msg.textContent = data.message || "If that email has an unlocked report, we've sent the access link to it.";
-    msg.classList.add('on');
-  } catch {
-    msg.textContent = "If that email has an unlocked report, we've sent the access link to it.";
-    msg.classList.add('on');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Send my link';
-  }
+    
+    alert("Report successfully downloaded. Your server cache session has been purged permanently.");
+    window.location.reload();
+  });
 }
-
-function showReportLink(orderId) {
-  const link = `${window.location.origin}${window.location.pathname}?order_id=${encodeURIComponent(orderId)}`;
-  document.getElementById('reportLinkInput').value = link;
-  document.getElementById('reportLinkBanner').style.display = 'block';
-  // Keep the URL bar in sync so a manual bookmark/refresh also works.
-  window.history.replaceState({}, '', link);
-}
-
-function copyReportLink() {
-  const input = document.getElementById('reportLinkInput');
-  input.select();
-  navigator.clipboard?.writeText(input.value).catch(() => {});
-  const btn = document.getElementById('copyLinkBtn');
-  const original = btn.textContent;
-  btn.textContent = 'Copied!';
-  setTimeout(() => { btn.textContent = original; }, 1500);
-}
-
-function unlockReport() {
-  document.getElementById('lockedBlock').classList.add('unlocked');
-  const statusBox = document.getElementById('modalStatusBox');
-  statusBox.classList.add('paid');
-  document.getElementById('modalStatusText').textContent = 'Payment confirmed — report unlocked! We\'ve also emailed you the access link.';
-  if (currentOrderId) showReportLink(currentOrderId);
-  setTimeout(closeModal, 1800);
-}
-
-function unlockReportSilently(orderId) {
-  document.getElementById('lockedBlock').classList.add('unlocked');
-  showReportLink(orderId);
-}
-
-(function init() {
-  const params = new URLSearchParams(window.location.search);
-  const orderId = params.get('order_id');
-  if (orderId) showEmailGate(orderId);
-})();
-
-(function init() {
-  const params = new URLSearchParams(window.location.search);
-  const orderId = params.get('order_id');
-  if (orderId) loadFromOrderId(orderId);
-})();
 </script>
 </body>
 </html>
