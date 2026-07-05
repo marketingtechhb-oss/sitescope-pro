@@ -296,10 +296,10 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
   <div class="modal">
     <div class="modal-icon">🔓</div>
     <div class="modal-title">Unlock Your Full Report</div>
-    <div class="modal-sub">Get the complete audit — executive summary, quick wins, and a prioritized action plan — plus a downloadable PDF, for a one-time payment of <strong id="modalPrice">9,99 $</strong>, paid securely in crypto via NOWPayments.</div>
+    <div class="modal-sub">Get the complete audit — executive summary, quick wins, and a prioritized action plan — plus a downloadable PDF, for a one-time payment of <strong id="modalPrice">14,99 $</strong>, paid securely in crypto via NOWPayments.</div>
 
     <div id="modalIdle">
-      <button class="pay-btn" id="payBtn" onclick="beginPayment()">💳 Pay <span class="priceInline">9,99 $</span> with NOWPayments</button>
+      <button class="pay-btn" id="payBtn" onclick="beginPayment()">💳 Pay <span class="priceInline">14,99 $</span> with NOWPayments</button>
       <div class="modal-note">You'll be redirected to a secure NOWPayments checkout page. Once your payment is confirmed, this page unlocks automatically — no need to refresh.</div>
     </div>
 
@@ -401,7 +401,7 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
           <div class="lock-feature">🎯 Priority Action Plan</div>
           <div class="lock-feature">📄 PDF Export</div>
         </div>
-        <button class="btn-unlock" onclick="openModal()">🔓 Unlock Full Report <span class="price-tag priceInline">9,99 $</span></button>
+        <button class="btn-unlock" onclick="openModal()">🔓 Unlock Full Report <span class="price-tag priceInline">14,99 $</span></button>
       </div>
     </div>
   </div>
@@ -566,7 +566,7 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
 
-const REPORT_PRICE = 9.99; // keep in sync with PRICE_USD in netlify/functions/create-payment.js
+const REPORT_PRICE = 14.99; // keep in sync with PRICE_USD in netlify/functions/create-payment.js
 function formatPrice(p) { return p.toFixed(2).replace('.', ',') + ' $'; }
 
 // ── LOADING STEPS ──
