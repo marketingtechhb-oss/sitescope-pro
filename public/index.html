@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SiteScope Pro — AI Website Audit</title>
+<meta name="description" content="Get an instant AI-powered audit of your website's SEO, performance, UX and security. Free score, full PDF report for a small one-time fee."/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #07090F;
+  --surface: #0F1520;
+  --surface2: #151E30;
+  --border: #1A2640;
+  --accent: #4F8EF7;
+  --accent2: #A855F7;
+  --gold: #F59E0B;
+  --text: #E2E8F5;
+  --muted: #5A6A8A;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(79,142,247,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 80%, rgba(168,85,247,0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+.wrap-wide { max-width: 1080px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+a { color: inherit; }
+
+/* ── NAV ── */
+.navbar { position: sticky; top: 0; z-index: 50; background: rgba(7,9,15,0.82); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+.nav-inner { max-width: 1080px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.nav-brand { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text); letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; font-weight: 500; }
+.nav-brand .brand-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); animation: breathe 3s ease-in-out infinite; }
+@keyframes breathe { 0%,100% { opacity:1; box-shadow: 0 0 8px var(--accent); } 50% { opacity:0.5; box-shadow: 0 0 3px var(--accent); } }
+.nav-links { display: flex; gap: 26px; list-style: none; font-size: 13px; color: var(--muted); }
+.nav-links a { text-decoration: none; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-cta { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 8px; text-decoration: none; white-space: nowrap; transition: border-color 0.2s; }
+.nav-cta:hover { border-color: var(--accent); }
+@media (max-width: 720px) { .nav-links { display: none; } }
+
+/* ── HERO ── */
+header.hero { padding: 64px 0 32px; text-align: center; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 20px; background: rgba(79,142,247,0.08); border: 1px solid rgba(79,142,247,0.2); padding: 6px 14px; border-radius: 999px; }
+h1 { font-family: 'Syne', sans-serif; font-size: clamp(30px, 5.5vw, 52px); font-weight: 800; line-height: 1.08; letter-spacing: -0.025em; margin-bottom: 14px; }
+h1 em { font-style: normal; background: linear-gradient(120deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.tagline { color: var(--muted); font-size: 15px; max-width: 460px; margin: 0 auto 12px; line-height: 1.65; }
+.hero-note { color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; margin-bottom: 36px; }
+
+/* ── AUDIT BOX ── */
+.audit-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 8px; }
+.field-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.field-group { margin-bottom: 4px; }
+input[type="text"] { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 16px; color: var(--text); font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,0.1); }
+input::placeholder { color: var(--muted); }
+.input-row { display: flex; gap: 10px; }
+.input-row input { flex: 1; }
+.btn-primary { background: linear-gradient(135deg, var(--accent), #6366F1); border: none; border-radius: var(--radius); padding: 13px 26px; color: white; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s, transform 0.15s; }
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.form-hint { color: var(--muted); font-size: 11px; margin-top: 10px; font-family: 'DM Mono', monospace; }
+
+/* ── REPORT UNAVAILABLE CARD ── */
+.notice-card { background: var(--surface); border: 1px solid rgba(239,68,68,0.25); border-radius: 16px; padding: 28px 24px; text-align: center; margin-bottom: 20px; }
+.notice-icon { font-size: 30px; margin-bottom: 10px; }
+.notice-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; margin-bottom: 8px; }
+.notice-text { color: var(--muted); font-size: 13px; max-width: 380px; margin: 0 auto 18px; line-height: 1.6; }
+
+/* ── LOADING ── */
+#loading { display: none; text-align: center; padding: 60px 0; }
+#loading.on { display: block; }
+.spin { width: 44px; height: 44px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-msg { color: var(--muted); font-size: 13px; font-family: 'DM Mono', monospace; margin-bottom: 6px; }
+.loading-step { color: var(--accent); font-size: 12px; font-family: 'DM Mono', monospace; }
+
+/* ── ERROR ── */
+.error-msg { display: none; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius); padding: 14px 18px; color: #FCA5A5; font-size: 13px; margin-top: 12px; }
+.error-msg.on { display: block; }
+
+/* ── RESULTS ── */
+#results { display: none; padding-top: 28px; }
+#results.on { display: block; }
+
+.score-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px 24px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; }
+.score-hero::after { content: ''; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); width: 280px; height: 140px; background: radial-gradient(ellipse, rgba(79,142,247,0.07), transparent 70%); pointer-events: none; }
+.score-url { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 16px; word-break: break-all; }
+.score-row { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; }
+.global-score { font-family: 'Syne', sans-serif; font-size: 88px; font-weight: 800; line-height: 1; }
+.global-score.good { color: var(--success); }
+.global-score.med  { color: var(--warning); }
+.global-score.bad  { color: var(--danger); }
+.grade-badge { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface2); }
+.grade-badge.good { color: var(--success); border-color: rgba(34,197,94,0.3); }
+.grade-badge.med  { color: var(--warning); border-color: rgba(245,158,11,0.3); }
+.grade-badge.bad  { color: var(--danger); border-color: rgba(239,68,68,0.3); }
+.score-verdict { font-size: 15px; color: var(--muted); margin: 14px 0 20px; }
+.progress-track { background: var(--border); border-radius: 4px; height: 5px; max-width: 320px; margin: 0 auto; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--danger) 0%, var(--warning) 50%, var(--success) 100%); transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+
+.section-head { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin: 28px 0 14px; display: flex; align-items: center; gap: 10px; color: var(--text); }
+.section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.cats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-bottom: 4px; }
+.cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color 0.2s; }
+.cat-card:hover { border-color: rgba(79,142,247,0.25); }
+.cat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.cat-name { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+.cat-num { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; }
+.cat-num.good { color: var(--success); }
+.cat-num.med  { color: var(--warning); }
+.cat-num.bad  { color: var(--danger); }
+.cat-track { background: var(--border); border-radius: 3px; height: 3px; overflow: hidden; margin-bottom: 10px; }
+.cat-fill { height: 100%; border-radius: 3px; transition: width 1s ease 0.4s; }
+.cat-fill.good { background: var(--success); }
+.cat-fill.med  { background: var(--warning); }
+.cat-fill.bad  { background: var(--danger); }
+.cat-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* Strengths (free preview) */
+.strengths-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.strength-card { background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.2); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; line-height: 1.55; display: flex; gap: 10px; align-items: flex-start; }
+.strength-card .icon { color: var(--success); flex-shrink: 0; }
+
+/* ── REPORT LINK BANNER ── */
+.report-link-banner { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.25); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; font-size: 13px; color: var(--text); }
+.report-link-row { display: flex; gap: 8px; margin-top: 10px; }
+.report-link-row input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; }
+.btn-copy { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 16px; color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-copy:hover { border-color: var(--success); }
+.download-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.btn-download { background: linear-gradient(135deg, var(--success), #16A34A); border: none; border-radius: var(--radius); padding: 13px 24px; color: white; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: opacity 0.2s, transform 0.15s; }
+.btn-download:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-download:disabled { opacity: 0.5; cursor: wait; }
+
+.downloaded-notice { display: none; background: rgba(79,142,247,0.06); border: 1px solid rgba(79,142,247,0.25); border-radius: var(--radius); padding: 16px 18px; margin-top: 14px; font-size: 13px; color: var(--text); }
+.downloaded-notice.on { display: block; }
+
+/* ── LOCKED SECTION ── */
+.locked-section { position: relative; margin-bottom: 20px; }
+.blur-content { filter: blur(6px); user-select: none; pointer-events: none; opacity: 0.6; transition: filter 0.5s, opacity 0.5s; }
+.locked-section.unlocked .blur-content { filter: none; user-select: auto; pointer-events: auto; opacity: 1; }
+.locked-section.unlocked .lock-overlay { display: none; }
+
+.lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(180deg, rgba(7,9,15,0) 0%, rgba(7,9,15,0.85) 40%); border-radius: 16px; z-index: 10; padding: 24px; text-align: center; }
+.lock-icon { font-size: 36px; margin-bottom: 12px; }
+.lock-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.lock-desc { color: var(--muted); font-size: 13px; margin-bottom: 20px; max-width: 340px; line-height: 1.6; }
+.lock-whats-inside { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; justify-content: center; }
+.lock-feature { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 6px; }
+
+.btn-unlock { background: linear-gradient(135deg, var(--gold), #F97316); border: none; border-radius: var(--radius); padding: 14px 32px; color: white; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity 0.2s, transform 0.15s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(245,158,11,0.3); }
+.btn-unlock:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 24px rgba(245,158,11,0.4); }
+.price-tag { background: rgba(255,255,255,0.2); border-radius: 6px; padding: 2px 8px; font-size: 13px; }
+
+/* Quick wins */
+.quickwins-list { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.quickwin-item { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; font-size: 13px; line-height: 1.6; }
+.quickwin-item:last-child { border-bottom: none; }
+.quickwin-item .num { font-family: 'DM Mono', monospace; color: var(--gold); font-weight: 600; flex-shrink: 0; }
+
+/* Payment modal */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.5); }
+.modal-icon { font-size: 40px; margin-bottom: 16px; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 24px; line-height: 1.6; }
+.modal-status { display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; font-size: 13px; color: var(--muted); margin-bottom: 16px; font-family: 'DM Mono', monospace; }
+.modal-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: breathe 1.4s ease-in-out infinite; }
+.modal-status.paid { color: var(--success); }
+.modal-status.paid .dot { background: var(--success); animation: none; }
+.pay-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-radius: var(--radius); font-weight: 600; font-size: 15px; cursor: pointer; text-decoration: none; transition: opacity 0.2s, transform 0.15s; border: none; background: linear-gradient(135deg, var(--gold), #F97316); color: white; margin-bottom: 12px; width: 100%; }
+.pay-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.pay-btn:disabled { opacity: 0.5; cursor: wait; }
+.modal-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.modal-close { margin-top: 16px; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 20px; color: var(--muted); cursor: pointer; font-size: 13px; width: 100%; }
+.modal-close:hover { border-color: var(--muted); }
+
+/* Summary */
+.summary-block { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 20px 22px; font-size: 14px; line-height: 1.75; color: var(--text); }
+
+/* Recs */
+.rec-list { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.rec-item { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; gap: 14px; align-items: flex-start; }
+.rec-item:last-child { border-bottom: none; }
+.rec-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.rec-dot.critical { background: var(--danger); box-shadow: 0 0 7px var(--danger); }
+.rec-dot.medium   { background: var(--warning); }
+.rec-dot.low      { background: var(--success); }
+.rec-body { flex: 1; }
+.rec-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.rec-desc  { font-size: 12px; color: var(--muted); line-height: 1.55; margin-bottom: 8px; }
+.rec-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.rec-tag { display: inline-block; font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 8px; background: var(--border); color: var(--muted); border-radius: 4px; }
+.rec-tag.impact-high { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+.rec-tag.impact-medium { background: rgba(245,158,11,0.12); color: #FCD34D; }
+.rec-tag.impact-low { background: rgba(34,197,94,0.12); color: #86EFAC; }
+
+/* ── MARKETING SECTIONS ── */
+.section { padding: 72px 0; position: relative; z-index: 1; }
+.section-divider { border-top: 1px solid var(--border); }
+.section-kicker { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; text-align: center; }
+.section-title { font-family: 'Syne', sans-serif; font-size: clamp(24px, 3.6vw, 34px); font-weight: 800; text-align: center; margin-bottom: 14px; letter-spacing: -0.02em; }
+.section-sub { color: var(--muted); font-size: 14px; text-align: center; max-width: 560px; margin: 0 auto 44px; line-height: 1.7; }
+
+.value-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.value-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; transition: transform 0.2s, border-color 0.2s; }
+.value-card:hover { transform: translateY(-3px); border-color: rgba(79,142,247,0.3); }
+.value-icon { font-size: 22px; margin-bottom: 14px; }
+.value-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+.value-text { color: var(--muted); font-size: 13px; line-height: 1.65; }
+
+.cost-panel { background: var(--surface); border: 1px solid rgba(239,68,68,0.2); border-radius: 18px; padding: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.cost-item { padding: 22px; border-radius: 12px; }
+.cost-num { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; color: var(--danger); margin-bottom: 8px; line-height: 1; }
+.cost-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.cost-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+.steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.step-card { text-align: center; padding: 8px; }
+.step-num { width: 40px; height: 40px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; color: var(--accent); font-size: 14px; margin: 0 auto 14px; }
+.step-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+.step-text { color: var(--muted); font-size: 12.5px; line-height: 1.6; max-width: 230px; margin: 0 auto; }
+
+.cta-band { background: linear-gradient(135deg, rgba(79,142,247,0.1), rgba(168,85,247,0.08)); border: 1px solid var(--border); border-radius: 20px; padding: 44px 30px; text-align: center; }
+.cta-band h3 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+.cta-band p { color: var(--muted); font-size: 14px; margin-bottom: 22px; }
+.cta-band .btn-primary { padding: 14px 32px; font-size: 15px; }
+
+/* ── FOOTER ── */
+footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 40px; }
+.footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; margin-bottom: 36px; }
+.footer-brand { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.footer-desc { color: var(--muted); font-size: 12.5px; line-height: 1.65; max-width: 260px; }
+.footer-col-title { font-size: 11px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 14px; }
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { color: var(--text); text-decoration: none; font-size: 13px; opacity: 0.85; }
+.footer-links a:hover { opacity: 1; color: var(--accent); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+
+@media (max-width: 720px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 500px) {
+  .input-row { flex-direction: column; }
+  .btn-primary { width: 100%; }
+  .global-score { font-size: 68px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .download-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand"><span class="brand-dot"></span>SiteScope Pro</a>
+    <ul class="nav-links">
+      <li><a href="#audit">Free Audit</a></li>
+      <li><a href="#why-performance">Why It Matters</a></li>
+      <li><a href="#cost">Cost of a Bad Site</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+    </ul>
+    <a href="#audit" class="nav-cta">Audit my site →</a>
+  </div>
+</nav>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-bg" id="payModal">
+  <div class="modal">
+    <div class="modal-icon">🔓</div>
+    <div class="modal-title">Unlock Your Full Report</div>
+    <div class="modal-sub">Get the complete audit — executive summary, quick wins, and a prioritized action plan — plus a downloadable PDF, for a one-time payment of <strong id="modalPrice">$5</strong>, paid securely in crypto via NOWPayments.</div>
+
+    <div id="modalIdle">
+      <button class="pay-btn" id="payBtn" onclick="beginPayment()">💳 Pay <span class="priceInline">$5</span> with NOWPayments</button>
+      <div class="modal-note">You'll be redirected to a secure NOWPayments checkout page. Once your payment is confirmed, this page unlocks automatically — no need to refresh.</div>
+    </div>
+
+    <div id="modalWaiting" style="display:none;">
+      <div class="modal-status" id="modalStatusBox"><span class="dot"></span><span id="modalStatusText">Waiting for payment confirmation…</span></div>
+      <div class="modal-note">Didn't get redirected? <a href="#" id="reopenCheckout" style="color:var(--accent);">Reopen the checkout page</a>.</div>
+    </div>
+
+    <button class="modal-close" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<div id="top"></div>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">✨ AI-Powered Website Audit</div>
+    <h1>Your website audit,<br><em>powered by AI</em></h1>
+    <p class="tagline">Instant SEO, performance, UX &amp; security analysis for businesses anywhere in the world.</p>
+    <p class="hero-note">No signup. No credit card to see your score. Full PDF report for a small one-time fee.</p>
+  </header>
+
+  <!-- AUDIT FORM -->
+  <div class="audit-card" id="audit">
+    <div class="field-group">
+      <div class="field-label">Website to audit</div>
+      <div class="input-row">
+        <input type="text" id="urlInput" placeholder="https://example.com"/>
+        <button class="btn-primary" id="auditBtn" onclick="startAudit()">Audit Now</button>
+      </div>
+      <div class="form-hint">Takes about 15–20 seconds.</div>
+    </div>
+    <div class="error-msg" id="errBox"></div>
+  </div>
+
+  <!-- REPORT UNAVAILABLE (bad/consumed ?order_id= link) -->
+  <div class="notice-card" id="reportUnavailable" style="display:none;">
+    <div class="notice-icon">📄</div>
+    <div class="notice-title">This report link isn't available anymore</div>
+    <div class="notice-text" id="reportUnavailableText">It may already have been downloaded, or the link is invalid. Run a new audit to generate a fresh report.</div>
+    <button class="btn-primary" onclick="window.location.href = window.location.pathname;">Start a new audit</button>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading">
+    <div class="spin"></div>
+    <div class="loading-msg">Analyzing website...</div>
+    <div class="loading-step" id="stepTxt">→ Reading structure &amp; content</div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="score-hero">
+      <div class="score-url" id="auditedUrl"></div>
+      <div class="score-row">
+        <div class="global-score" id="gScore">—</div>
+        <div class="grade-badge" id="gGrade">—</div>
+      </div>
+      <div class="score-verdict" id="gVerdict"></div>
+      <div class="progress-track"><div class="progress-fill" id="gBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="section-head">Category Scores</div>
+    <div class="cats-grid" id="catsGrid"></div>
+
+    <div class="section-head" id="strengthsHead" style="display:none;">Top Strengths</div>
+    <div class="strengths-grid" id="strengthsGrid" style="margin-bottom: 8px;"></div>
+
+    <div class="report-link-banner" id="reportLinkBanner" style="display:none;">
+      <span>✅ Payment confirmed — your full report is unlocked below. <strong>Download the PDF to keep it</strong>: once downloaded, this link stops working and a new audit + payment is needed for another report.</span>
+      <div class="report-link-row">
+        <input type="text" id="reportLinkInput" readonly onclick="this.select()"/>
+        <button class="btn-copy" id="copyLinkBtn" onclick="copyReportLink()">Copy link</button>
+      </div>
+      <div class="download-row">
+        <button class="btn-download" id="downloadBtn" onclick="downloadReport()">📄 Download PDF Report</button>
+      </div>
+      <div class="downloaded-notice" id="downloadedNotice">✅ Downloaded! This report link has been used and is now inactive. Run a new audit whenever you need another report.</div>
+    </div>
+
+    <div class="locked-section" id="lockedBlock">
+      <div class="blur-content">
+        <div class="section-head">Quick Wins</div>
+        <div class="quickwins-list" id="quickwinsList"></div>
+
+        <div class="section-head" style="margin-top:28px;">Executive Summary</div>
+        <div class="summary-block" id="summaryBlock"></div>
+
+        <div class="section-head" style="margin-top:28px;">Action Plan</div>
+        <div class="rec-list" id="recList"></div>
+      </div>
+      <div class="lock-overlay" id="lockOverlay">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Full Report Locked</div>
+        <div class="lock-desc">Your score, grade, and top strengths are free. Unlock the complete audit — plus a downloadable PDF — to see your quick wins and full action plan.</div>
+        <div class="lock-whats-inside">
+          <div class="lock-feature">⚡ Quick Wins</div>
+          <div class="lock-feature">📋 Executive Summary</div>
+          <div class="lock-feature">🎯 Priority Action Plan</div>
+          <div class="lock-feature">📄 PDF Export</div>
+        </div>
+        <button class="btn-unlock" onclick="openModal()">🔓 Unlock Full Report <span class="price-tag">$5</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY PERFORMANCE MATTERS -->
+<div class="section section-divider" id="why-performance">
+  <div class="wrap-wide">
+    <div class="section-kicker">Why it matters</div>
+    <h2 class="section-title">A fast, well-built site is a growth channel</h2>
+    <p class="section-sub">Your website is often the first — and only — impression a customer forms of your business, wherever in the world they're browsing from. Small technical gaps translate directly into lost customers.</p>
+    <div class="value-grid">
+      <div class="value-card">
+        <div class="value-icon">🔍</div>
+        <div class="value-title">Better search visibility</div>
+        <div class="value-text">Search engines favor sites with clean structure, fast load times, and mobile-friendly layouts. Fixing technical SEO issues helps the right customers find you before they find a competitor.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⚡</div>
+        <div class="value-title">Visitors who actually stay</div>
+        <div class="value-text">People decide whether to stay on a page within seconds. A site that loads quickly and feels responsive keeps visitors engaged long enough to explore what you offer.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🛒</div>
+        <div class="value-title">More completed actions</div>
+        <div class="value-text">Clear navigation, obvious calls to action, and a smooth checkout or contact flow are what turn browsing into inquiries, bookings, or sales.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔒</div>
+        <div class="value-title">Trust at first glance</div>
+        <div class="value-text">A valid HTTPS certificate, working forms, and a modern design signal that your business is legitimate and worth doing business with.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">📱</div>
+        <div class="value-title">A mobile-first audience</div>
+        <div class="value-text">The majority of visitors worldwide now browse on mobile first. A site that isn't built mobile-first is turning away most of its traffic before it even loads.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">📊</div>
+        <div class="value-title">Compounding advantage</div>
+        <div class="value-text">Performance improvements stack over time — better rankings bring more traffic, which a well-converting site turns into more customers, funding further improvements.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COST OF A BAD SITE -->
+<div class="section section-divider" id="cost">
+  <div class="wrap-wide">
+    <div class="section-kicker">The other side</div>
+    <h2 class="section-title">What an underperforming website costs you</h2>
+    <p class="section-sub">Most business owners never see the visitors who leave — they just see the traffic numbers, not the reasons people didn't convert.</p>
+    <div class="cost-panel">
+      <div class="cost-item">
+        <div class="cost-num">👋</div>
+        <div class="cost-label">Silent bounces</div>
+        <div class="cost-text">A slow-loading page loses visitors before they've read a single word — and most never come back to try again.</div>
+      </div>
+      <div class="cost-item">
+        <div class="cost-num">📉</div>
+        <div class="cost-label">Invisible in search</div>
+        <div class="cost-text">Missing titles, broken meta tags, and poor structure keep your site buried below competitors who fixed theirs.</div>
+      </div>
+      <div class="cost-item">
+        <div class="cost-num">🚪</div>
+        <div class="cost-label">Confused visitors leave</div>
+        <div class="cost-text">Unclear navigation and buried contact forms mean interested customers give up instead of reaching out.</div>
+      </div>
+      <div class="cost-item">
+        <div class="cost-num">⚠️</div>
+        <div class="cost-label">Trust erodes fast</div>
+        <div class="cost-text">An expired certificate or a dated, broken layout makes visitors question whether your business is still active — or safe to buy from.</div>
+      </div>
+      <div class="cost-item">
+        <div class="cost-num">📵</div>
+        <div class="cost-label">Mobile friction</div>
+        <div class="cost-text">Tiny buttons, unreadable text, and layouts that don't adapt to phones frustrate the majority of your visitors on their first visit.</div>
+      </div>
+      <div class="cost-item">
+        <div class="cost-num">🏁</div>
+        <div class="cost-label">Ceding ground to competitors</div>
+        <div class="cost-text">Every week these issues go unfixed is a week a competitor's better-optimized site keeps winning the customers you could have had.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section section-divider" id="how-it-works">
+  <div class="wrap">
+    <div class="section-kicker">Simple by design</div>
+    <h2 class="section-title">From URL to action plan in under a minute</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-title">Paste your URL</div>
+        <div class="step-text">No signup, no API key, no technical setup required.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-title">Get your free score</div>
+        <div class="step-text">See your global score, grade, and category breakdown instantly.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-title">Unlock &amp; download</div>
+        <div class="step-text">Pay once to reveal the full report and download it as a PDF to keep.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING / CTA -->
+<div class="section section-divider" id="pricing">
+  <div class="wrap">
+    <div class="cta-band">
+      <h3>See what's really slowing your site down</h3>
+      <p>Free score and category breakdown. Full PDF report with fixes for a small one-time fee.</p>
+      <a href="#audit" class="btn-primary" style="text-decoration:none; display:inline-block;">Run my free audit</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap-wide">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><span class="brand-dot"></span>SiteScope Pro</div>
+        <div class="footer-desc">AI-powered website audits for SEO, performance, UX and security — for businesses anywhere in the world.</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Product</div>
+        <ul class="footer-links">
+          <li><a href="#audit">Free Audit</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Learn</div>
+        <ul class="footer-links">
+          <li><a href="#why-performance">Why Performance Matters</a></li>
+          <li><a href="#cost">Cost of a Bad Site</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a href="mailto:hello@sitescopepro.com">Contact</a></li>
+          <li><a href="#top">Back to top</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> SiteScope Pro. All rights reserved.</span>
+      <span>Payments processed securely via NOWPayments.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+const REPORT_PRICE = 5; // keep in sync with PRICE_USD in netlify/functions/create-payment.js
+
+// ── LOADING STEPS ──
+const STEPS = [
+  '→ Reading structure & content',
+  '→ Analyzing SEO signals',
+  '→ Evaluating page speed indicators',
+  '→ Checking UX & mobile design',
+  '→ Assessing security posture',
+  '→ Generating recommendations'
+];
+let stepI = 0, stepTimer;
+function startSteps() {
+  stepI = 0;
+  document.getElementById('stepTxt').textContent = STEPS[0];
+  stepTimer = setInterval(() => {
+    stepI = (stepI + 1) % STEPS.length;
+    document.getElementById('stepTxt').textContent = STEPS[stepI];
+  }, 1500);
+}
+
+// ── SCORE HELPERS ──
+function sc(n) { return n >= 70 ? 'good' : n >= 40 ? 'med' : 'bad'; }
+function verdict(n) {
+  if (n >= 85) return 'Excellent — your site is well optimized';
+  if (n >= 70) return 'Good — minor improvements will help';
+  if (n >= 50) return 'Average — several issues need attention';
+  if (n >= 30) return 'Below average — significant fixes needed';
+  return 'Poor — critical issues require immediate action';
+}
+function gradeClass(grade) {
+  if (!grade) return 'med';
+  const letter = grade[0];
+  if (letter === 'A' || letter === 'B') return 'good';
+  if (letter === 'C') return 'med';
+  return 'bad';
+}
+
+let currentAuditUrl = '';
+let currentAuditData = null;
+let currentOrderId = null;
+let pollTimer = null;
+let checkoutWindow = null;
+
+// ── AUDIT ──
+async function startAudit() {
+  const url = document.getElementById('urlInput').value.trim();
+  const err = document.getElementById('errBox');
+  err.classList.remove('on'); err.textContent = '';
+
+  if (!url) { err.textContent = 'Please enter a website URL.'; err.classList.add('on'); return; }
+  if (!/^https?:\/\/.+\..+/.test(url)) { err.textContent = 'Enter a valid URL starting with https://'; err.classList.add('on'); return; }
+
+  document.getElementById('auditBtn').disabled = true;
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('results').classList.remove('on');
+  document.getElementById('lockedBlock').classList.remove('unlocked');
+  document.getElementById('reportLinkBanner').style.display = 'none';
+  startSteps();
+
+  try {
+    const res = await fetch('/.netlify/functions/audit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Audit failed. Please try again.');
+    render(data.audit, data.url);
+  } catch (e) {
+    clearInterval(stepTimer);
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('auditBtn').disabled = false;
+    err.textContent = 'Error: ' + (e.message || 'Something went wrong. Please try again.');
+    err.classList.add('on');
+  }
+}
+
+function render(a, url) {
+  clearInterval(stepTimer);
+  currentAuditData = a;
+  currentAuditUrl = url;
+  document.getElementById('loading').classList.remove('on');
+  document.getElementById('auditBtn').disabled = false;
+
+  const n = a.globalScore;
+  const cls = sc(n);
+  document.getElementById('auditedUrl').textContent = url;
+  const gs = document.getElementById('gScore');
+  gs.textContent = n; gs.className = 'global-score ' + cls;
+
+  const gGrade = document.getElementById('gGrade');
+  if (a.grade) {
+    gGrade.textContent = a.grade;
+    gGrade.className = 'grade-badge ' + gradeClass(a.grade);
+    gGrade.style.display = 'block';
+  } else {
+    gGrade.style.display = 'none';
+  }
+
+  document.getElementById('gVerdict').textContent = verdict(n);
+  setTimeout(() => { document.getElementById('gBar').style.width = n + '%'; }, 80);
+
+  document.getElementById('catsGrid').innerHTML = a.categories.map(c => {
+    const cc = sc(c.score);
+    return `<div class="cat-card">
+      <div class="cat-top">
+        <div class="cat-name">${c.icon} ${c.name}</div>
+        <div class="cat-num ${cc}">${c.score}</div>
+      </div>
+      <div class="cat-track"><div class="cat-fill ${cc}" style="width:${c.score}%"></div></div>
+      <div class="cat-text">${c.issues}</div>
+    </div>`;
+  }).join('');
+
+  const strengthsHead = document.getElementById('strengthsHead');
+  const strengthsGrid = document.getElementById('strengthsGrid');
+  if (a.strengths && a.strengths.length) {
+    strengthsHead.style.display = 'flex';
+    strengthsGrid.innerHTML = a.strengths.map(s => `<div class="strength-card"><span class="icon">✓</span><span>${s}</span></div>`).join('');
+  } else {
+    strengthsHead.style.display = 'none';
+    strengthsGrid.innerHTML = '';
+  }
+
+  document.getElementById('quickwinsList').innerHTML = (a.quickWins || []).map((q, i) => `
+    <div class="quickwin-item"><span class="num">${i + 1}.</span><span>${q}</span></div>`).join('');
+
+  document.getElementById('summaryBlock').textContent = a.summary;
+
+  document.getElementById('recList').innerHTML = a.recommendations.map(r => `
+    <div class="rec-item">
+      <div class="rec-dot ${r.priority}"></div>
+      <div class="rec-body">
+        <div class="rec-title">${r.title}</div>
+        <div class="rec-desc">${r.description}</div>
+        <div class="rec-tags">
+          <span class="rec-tag">${r.category}</span>
+          ${r.impact ? `<span class="rec-tag impact-${r.impact.toLowerCase()}">Impact: ${r.impact}</span>` : ''}
+          ${r.effort ? `<span class="rec-tag">Effort: ${r.effort}</span>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('results').classList.add('on');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── PAYMENT (NOWPayments) ──
+function openModal() {
+  document.getElementById('payModal').classList.add('open');
+  document.getElementById('modalIdle').style.display = 'block';
+  document.getElementById('modalWaiting').style.display = 'none';
+}
+function closeModal() {
+  document.getElementById('payModal').classList.remove('open');
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+async function beginPayment() {
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating secure checkout…';
+  try {
+    const res = await fetch('/.netlify/functions/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: currentAuditUrl, audit: currentAuditData })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not start payment.');
+
+    currentOrderId = data.orderId;
+    checkoutWindow = window.open(data.invoiceUrl, '_blank');
+
+    document.getElementById('modalIdle').style.display = 'none';
+    document.getElementById('modalWaiting').style.display = 'block';
+    document.getElementById('reopenCheckout').href = data.invoiceUrl;
+    document.getElementById('reopenCheckout').onclick = (e) => {
+      e.preventDefault();
+      window.open(data.invoiceUrl, '_blank');
+    };
+
+    startPolling(currentOrderId);
+  } catch (e) {
+    alert('Payment error: ' + (e.message || 'Please try again.'));
+    btn.disabled = false;
+    btn.textContent = '💳 Pay $' + REPORT_PRICE + ' with NOWPayments';
+  }
+}
+
+function startPolling(orderId) {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    try {
+      const res = await fetch('/.netlify/functions/check-payment?orderId=' + encodeURIComponent(orderId));
+      const data = await res.json();
+      if (data.status === 'paid') {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        unlockReport();
+      }
+    } catch { /* keep polling */ }
+  }, 3000);
+}
+
+function showReportLink(orderId) {
+  const link = `${window.location.origin}${window.location.pathname}?order_id=${encodeURIComponent(orderId)}`;
+  document.getElementById('reportLinkInput').value = link;
+  document.getElementById('reportLinkBanner').style.display = 'block';
+  document.getElementById('downloadBtn').style.display = 'inline-flex';
+  document.getElementById('downloadedNotice').classList.remove('on');
+  window.history.replaceState({}, '', link);
+}
+
+function copyReportLink() {
+  const input = document.getElementById('reportLinkInput');
+  input.select();
+  navigator.clipboard?.writeText(input.value).catch(() => {});
+  const btn = document.getElementById('copyLinkBtn');
+  const original = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => { btn.textContent = original; }, 1500);
+}
+
+function unlockReport() {
+  document.getElementById('lockedBlock').classList.add('unlocked');
+  const statusBox = document.getElementById('modalStatusBox');
+  statusBox.classList.add('paid');
+  document.getElementById('modalStatusText').textContent = 'Payment confirmed — report unlocked!';
+  if (currentOrderId) showReportLink(currentOrderId);
+  setTimeout(closeModal, 1500);
+}
+
+function unlockReportSilently(orderId) {
+  document.getElementById('lockedBlock').classList.add('unlocked');
+  showReportLink(orderId);
+}
+
+// ── PDF EXPORT ──
+function buildPdf(audit, url) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 48;
+  let y = 0;
+
+  const colors = {
+    accent: [79, 142, 247],
+    dark: [15, 21, 32],
+    muted: [90, 106, 138],
+    success: [22, 163, 74],
+    warning: [217, 119, 6],
+    danger: [220, 38, 38],
+    text: [20, 24, 34],
+  };
+
+  function scoreColor(n) {
+    if (n >= 70) return colors.success;
+    if (n >= 40) return colors.warning;
+    return colors.danger;
+  }
+
+  function checkPageBreak(minSpace) {
+    if (y > doc.internal.pageSize.getHeight() - minSpace) {
+      doc.addPage();
+      y = 60;
+    }
+  }
+
+  doc.setFillColor(...colors.dark);
+  doc.rect(0, 0, pageWidth, 90, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.text('SiteScope Pro — Website Audit Report', margin, 40);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(200, 210, 230);
+  doc.text(url, margin, 60);
+  doc.text(new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }), margin, 75);
+
+  y = 130;
+
+  doc.setTextColor(...scoreColor(audit.globalScore));
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(48);
+  doc.text(String(audit.globalScore), margin, y);
+
+  if (audit.grade) {
+    doc.setFontSize(20);
+    doc.setTextColor(...colors.text);
+    doc.text('Grade: ' + audit.grade, margin + 100, y - 15);
+  }
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(...colors.muted);
+  doc.text('Overall Score out of 100', margin, y + 18);
+  y += 50;
+
+  checkPageBreak(120);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(...colors.text);
+  doc.text('Executive Summary', margin, y);
+  y += 18;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10.5);
+  doc.setTextColor(60, 70, 90);
+  const summaryLines = doc.splitTextToSize(audit.summary || '', pageWidth - margin * 2);
+  doc.text(summaryLines, margin, y);
+  y += summaryLines.length * 14 + 20;
+
+  if (audit.strengths && audit.strengths.length) {
+    checkPageBreak(100);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(...colors.success);
+    doc.text('Top Strengths', margin, y);
+    y += 16;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10.5);
+    doc.setTextColor(...colors.text);
+    audit.strengths.forEach(s => {
+      checkPageBreak(40);
+      const lines = doc.splitTextToSize('✓ ' + s, pageWidth - margin * 2 - 10);
+      doc.text(lines, margin, y);
+      y += lines.length * 13 + 6;
+    });
+    y += 10;
+  }
+
+  checkPageBreak(140);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(...colors.text);
+  doc.text('Category Scores', margin, y);
+  y += 20;
+
+  (audit.categories || []).forEach(c => {
+    checkPageBreak(40);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...colors.text);
+    doc.text(c.name, margin, y);
+    doc.setTextColor(...scoreColor(c.score));
+    doc.text(String(c.score) + ' / 100', pageWidth - margin - 50, y);
+    y += 14;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.muted);
+    const lines = doc.splitTextToSize(c.issues || '', pageWidth - margin * 2);
+    doc.text(lines, margin, y);
+    y += lines.length * 12 + 14;
+  });
+
+  if (audit.quickWins && audit.quickWins.length) {
+    checkPageBreak(100);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(...colors.warning);
+    doc.text('Quick Wins', margin, y);
+    y += 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10.5);
+    doc.setTextColor(...colors.text);
+    audit.quickWins.forEach((q, i) => {
+      checkPageBreak(40);
+      const lines = doc.splitTextToSize(`${i + 1}. ${q}`, pageWidth - margin * 2 - 10);
+      doc.text(lines, margin, y);
+      y += lines.length * 13 + 8;
+    });
+    y += 10;
+  }
+
+  checkPageBreak(120);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(...colors.text);
+  doc.text('Action Plan', margin, y);
+  y += 20;
+
+  const priorityColor = { critical: colors.danger, medium: colors.warning, low: colors.success };
+
+  (audit.recommendations || []).forEach(r => {
+    checkPageBreak(70);
+    doc.setFillColor(...(priorityColor[r.priority] || colors.muted));
+    doc.circle(margin + 3, y - 3, 3, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...colors.text);
+    doc.text(r.title || '', margin + 14, y);
+    y += 14;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.muted);
+    const descLines = doc.splitTextToSize(r.description || '', pageWidth - margin * 2 - 14);
+    doc.text(descLines, margin + 14, y);
+    y += descLines.length * 12 + 4;
+    const tags = [r.category, r.impact ? 'Impact: ' + r.impact : '', r.effort ? 'Effort: ' + r.effort : ''].filter(Boolean).join('   •   ');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...colors.accent);
+    doc.text(tags, margin + 14, y);
+    y += 20;
+  });
+
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...colors.muted);
+    doc.text(`SiteScope Pro · Page ${i} of ${pageCount}`, margin, doc.internal.pageSize.getHeight() - 24);
+  }
+
+  return doc;
+}
+
+async function downloadReport() {
+  if (!currentAuditData || !currentOrderId) return;
+  const btn = document.getElementById('downloadBtn');
+  btn.disabled = true;
+  btn.textContent = 'Preparing PDF…';
+
+  try {
+    const doc = buildPdf(currentAuditData, currentAuditUrl);
+    const domain = (() => { try { return new URL(currentAuditUrl).hostname; } catch { return 'report'; } })();
+    doc.save(`sitescope-pro-report-${domain}.pdf`);
+
+    await fetch('/.netlify/functions/consume-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: currentOrderId })
+    }).catch(() => {});
+
+    document.getElementById('downloadedNotice').classList.add('on');
+    btn.style.display = 'none';
+  } catch (e) {
+    alert('Could not generate the PDF. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📄 Download PDF Report';
+  }
+}
+
+async function loadFromOrderId(orderId) {
+  try {
+    const res = await fetch('/.netlify/functions/get-report?orderId=' + encodeURIComponent(orderId));
+    const data = await res.json();
+
+    if (res.status === 404) {
+      document.getElementById('audit').style.display = 'none';
+      document.getElementById('reportUnavailable').style.display = 'block';
+      if (data.message) document.getElementById('reportUnavailableText').textContent = data.message;
+      return;
+    }
+    if (!res.ok || !data.audit) return;
+
+    currentOrderId = orderId;
+    render(data.audit, data.url);
+
+    if (data.status === 'paid') {
+      unlockReportSilently(orderId);
+    } else {
+      openModal();
+      document.getElementById('modalIdle').style.display = 'none';
+      document.getElementById('modalWaiting').style.display = 'block';
+      startPolling(orderId);
+    }
+  } catch { /* ignore — user can just run a fresh audit */ }
+}
+
+(function init() {
+  document.querySelectorAll('.priceInline').forEach(el => el.textContent = '$' + REPORT_PRICE);
+  document.getElementById('modalPrice').textContent = '$' + REPORT_PRICE;
+
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get('order_id');
+  if (orderId) loadFromOrderId(orderId);
+})();
+</script>
+</body>
+</html>

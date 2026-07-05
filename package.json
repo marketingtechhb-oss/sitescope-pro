@@ -1,0 +1,9 @@
+{
+  "name": "sitescope-pro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SiteScope Pro - AI website audit tool with crypto paywall (NOWPayments) and server-side Gemini key.",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
