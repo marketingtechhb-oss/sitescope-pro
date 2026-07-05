@@ -3,8 +3,40 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SiteScope Pro — AI Website Audit</title>
+<title>PulseAudit — AI Website Audit</title>
 <meta name="description" content="Get an instant AI-powered audit of your website's SEO, performance, UX and security. Free score, full PDF report for a small one-time fee."/>
+<link rel="canonical" href="https://pulseaudit.netlify.app/"/>
+<meta name="google-site-verification" content="tQclU6m7vSGfp7KwYHgMki3ott_DA3uhrI3NdxNxGjI" />
+<meta name="theme-color" content="#07090F"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2307090F'/%3E%3Cpath d='M5 17h5l2.5-8 5 16 2.5-8H27' stroke='%234F8EF7' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
+
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="PulseAudit"/>
+<meta property="og:title" content="PulseAudit — AI Website Audit"/>
+<meta property="og:description" content="Get an instant AI-powered audit of your website's SEO, performance, UX and security. Free score, full PDF report for a small one-time fee."/>
+<meta property="og:url" content="https://pulseaudit.netlify.app/"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="PulseAudit — AI Website Audit"/>
+<meta name="twitter:description" content="Get an instant AI-powered audit of your website's SEO, performance, UX and security."/>
+
+<!-- Structured data for search engines -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "PulseAudit",
+  "url": "https://pulseaudit.netlify.app/",
+  "description": "AI-powered website audit tool for SEO, performance, UX and security — free score with a downloadable PDF report.",
+  "applicationCategory": "BusinessApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "14.99",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap');
@@ -279,7 +311,7 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
 <!-- NAV -->
 <nav class="navbar">
   <div class="nav-inner">
-    <a href="#top" class="nav-brand"><span class="brand-dot"></span>SiteScope Pro</a>
+    <a href="#top" class="nav-brand"><span class="brand-dot"></span>PulseAudit</a>
     <ul class="nav-links">
       <li><a href="#audit">Free Audit</a></li>
       <li><a href="#why-performance">Why It Matters</a></li>
@@ -530,7 +562,7 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
   <div class="wrap-wide">
     <div class="footer-grid">
       <div>
-        <div class="footer-brand"><span class="brand-dot"></span>SiteScope Pro</div>
+        <div class="footer-brand"><span class="brand-dot"></span>PulseAudit</div>
         <div class="footer-desc">AI-powered website audits for SEO, performance, UX and security — for businesses anywhere in the world.</div>
       </div>
       <div>
@@ -551,13 +583,13 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
       <div>
         <div class="footer-col-title">Company</div>
         <ul class="footer-links">
-          <li><a href="mailto:hello@sitescopepro.com">Contact</a></li>
+          <li><a href="mailto:marketing.tech.hb@gmail.com">Contact</a></li>
           <li><a href="#top">Back to top</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© <span id="year"></span> SiteScope Pro. All rights reserved.</span>
+      <span>© <span id="year"></span> PulseAudit. All rights reserved.</span>
       <span>Payments processed securely via NOWPayments.</span>
     </div>
   </div>
@@ -842,7 +874,7 @@ function buildPdf(audit, url) {
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
-  doc.text('SiteScope Pro — Website Audit Report', margin, 40);
+  doc.text('PulseAudit — Website Audit Report', margin, 40);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(200, 210, 230);
@@ -980,7 +1012,7 @@ function buildPdf(audit, url) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
     doc.setTextColor(...colors.muted);
-    doc.text(`SiteScope Pro · Page ${i} of ${pageCount}`, margin, doc.internal.pageSize.getHeight() - 24);
+    doc.text(`PulseAudit · Page ${i} of ${pageCount}`, margin, doc.internal.pageSize.getHeight() - 24);
   }
 
   return doc;
@@ -995,7 +1027,7 @@ async function downloadReport() {
   try {
     const doc = buildPdf(currentAuditData, currentAuditUrl);
     const domain = (() => { try { return new URL(currentAuditUrl).hostname; } catch { return 'report'; } })();
-    doc.save(`sitescope-pro-report-${domain}.pdf`);
+    doc.save(`pulseaudit-report-${domain}.pdf`);
 
     await fetch('/.netlify/functions/consume-report', {
       method: 'POST',
