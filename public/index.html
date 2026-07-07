@@ -2,12 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<script>
+(function(){
+  try {
+    var saved = localStorage.getItem('pulseaudit-theme');
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (prefersDark ? 'dark' : 'light'));
+  } catch (e) {}
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PulseAudit — AI Website Audit</title>
 <meta name="description" content="Get an instant AI-powered audit of your website's SEO, performance, UX and security. Free score, full PDF report for a small one-time fee."/>
 <link rel="canonical" href="https://pulseaudit.netlify.app/"/>
 <meta name="google-site-verification" content="tQclU6m7vSGfp7KwYHgMki3ott_DA3uhrI3NdxNxGjI" />
-<meta name="theme-color" content="#07090F"/>
+<meta name="theme-color" content="#F8FAFC"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2307090F'/%3E%3Cpath d='M5 17h5l2.5-8 5 16 2.5-8H27' stroke='%234F8EF7' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
 
 <!-- Open Graph / social sharing -->
@@ -38,32 +47,58 @@
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --bg: #07090F;
-  --surface: #0F1520;
-  --surface2: #151E30;
-  --border: #1A2640;
-  --accent: #4F8EF7;
-  --accent2: #A855F7;
-  --gold: #F59E0B;
-  --text: #E2E8F5;
-  --muted: #5A6A8A;
-  --success: #22C55E;
-  --warning: #F59E0B;
-  --danger: #EF4444;
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface2: #F1F5F9;
+  --border: #E2E8F0;
+  --accent: #0F766E;
+  --accent2: #2563EB;
+  --warm: #F97316;
+  --text: #1E293B;
+  --muted: #64748B;
+  --success: #16A34A;
+  --warning: #D97706;
+  --danger: #DC2626;
   --radius: 12px;
+  --navbar-bg: rgba(248,250,252,0.82);
+  --overlay-fade: rgba(248,250,252,0);
+  --overlay-solid: rgba(248,250,252,0.85);
+}
+
+:root[data-theme="dark"] {
+  --bg: #0B1220;
+  --surface: #111A2C;
+  --surface2: #17233A;
+  --border: #26344C;
+  --accent: #14B8A6;
+  --accent2: #3B82F6;
+  --warm: #FB923C;
+  --text: #E7ECF3;
+  --muted: #8B9AB3;
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --navbar-bg: rgba(11,18,32,0.82);
+  --overlay-fade: rgba(17,26,44,0);
+  --overlay-solid: rgba(17,26,44,0.88);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: light; }
+html[data-theme="dark"] { color-scheme: dark; }
+body, body * { transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
 html { scroll-behavior: smooth; }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Manrope', sans-serif;
   min-height: 100vh;
 }
 
@@ -72,8 +107,8 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(79,142,247,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 30% at 80% 80%, rgba(168,85,247,0.05) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(15,118,110,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 80%, rgba(37,99,235,0.05) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
@@ -83,44 +118,61 @@ body::before {
 a { color: inherit; }
 
 /* ── NAV ── */
-.navbar { position: sticky; top: 0; z-index: 50; background: rgba(7,9,15,0.82); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+.navbar { position: sticky; top: 0; z-index: 50; background: var(--navbar-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
 .nav-inner { max-width: 1080px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-.nav-brand { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text); letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; font-weight: 500; }
-.nav-brand .brand-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); animation: breathe 3s ease-in-out infinite; }
-@keyframes breathe { 0%,100% { opacity:1; box-shadow: 0 0 8px var(--accent); } 50% { opacity:0.5; box-shadow: 0 0 3px var(--accent); } }
+.nav-brand { display: flex; align-items: center; gap: 8px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; color: var(--text); letter-spacing: -0.01em; text-transform: none; text-decoration: none; font-weight: 800; }
+.brand-icon { color: var(--accent); font-size: 19px; }
 .nav-links { display: flex; gap: 26px; list-style: none; font-size: 13px; color: var(--muted); }
 .nav-links a { text-decoration: none; transition: color 0.2s; }
 .nav-links a:hover { color: var(--text); }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.theme-toggle { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-size: 15px; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 .nav-cta { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 8px; text-decoration: none; white-space: nowrap; transition: border-color 0.2s; }
 .nav-cta:hover { border-color: var(--accent); }
 @media (max-width: 720px) { .nav-links { display: none; } }
 
 /* ── HERO ── */
-header.hero { padding: 64px 0 32px; text-align: center; }
-.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 20px; background: rgba(79,142,247,0.08); border: 1px solid rgba(79,142,247,0.2); padding: 6px 14px; border-radius: 999px; }
-h1 { font-family: 'Syne', sans-serif; font-size: clamp(30px, 5.5vw, 52px); font-weight: 800; line-height: 1.08; letter-spacing: -0.025em; margin-bottom: 14px; }
+.wrap-hero { max-width: 1080px; }
+.hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; padding: 56px 0 48px; }
+.hero-right { display: flex; justify-content: center; }
+.hero-illustration { width: 100%; max-width: 420px; filter: drop-shadow(0 20px 40px rgba(15,23,42,0.08)); }
+header.hero { padding: 0 0 28px; text-align: left; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 20px; background: rgba(15,118,110,0.08); border: 1px solid rgba(15,118,110,0.2); padding: 6px 14px; border-radius: 999px; }
+h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(30px, 4.2vw, 46px); font-weight: 800; line-height: 1.12; letter-spacing: -0.025em; margin-bottom: 14px; }
 h1 em { font-style: normal; background: linear-gradient(120deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.tagline { color: var(--muted); font-size: 15px; max-width: 460px; margin: 0 auto 12px; line-height: 1.65; }
-.hero-note { color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; margin-bottom: 36px; }
+.tagline { color: var(--muted); font-size: 16px; max-width: 460px; margin: 0 0 20px; line-height: 1.65; }
+.hero-note { color: var(--muted); font-size: 12px; font-family: 'JetBrains Mono', monospace; margin: 14px 0 0; }
+.hero-checklist { display: flex; flex-wrap: wrap; gap: 10px 22px; list-style: none; margin-bottom: 4px; }
+.hero-checklist li { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; color: var(--text); }
+.hero-checklist i { color: var(--success); font-size: 15px; }
+@media (max-width: 860px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 32px; padding: 40px 0 32px; }
+  .hero-right { order: -1; }
+  .hero-illustration { max-width: 300px; }
+  header.hero { text-align: center; }
+  .tagline { margin-left: auto; margin-right: auto; }
+  .hero-checklist { justify-content: center; }
+}
 
 /* ── AUDIT BOX ── */
-.audit-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 8px; }
-.field-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.audit-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+.field-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
 .field-group { margin-bottom: 4px; }
-input[type="text"] { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 16px; color: var(--text); font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,0.1); }
+input[type="text"] { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 16px; color: var(--text); font-size: 14px; font-family: 'Manrope', sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15,118,110,0.1); }
 input::placeholder { color: var(--muted); }
 .input-row { display: flex; gap: 10px; }
 .input-row input { flex: 1; }
-.btn-primary { background: linear-gradient(135deg, var(--accent), #6366F1); border: none; border-radius: var(--radius); padding: 13px 26px; color: white; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s, transform 0.15s; }
-.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary { background: var(--accent); border: none; border-radius: 999px; padding: 13px 28px; color: white; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.15s; }
+.btn-primary:hover { background: #0D5F58; transform: translateY(-1px); }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.form-hint { color: var(--muted); font-size: 11px; margin-top: 10px; font-family: 'DM Mono', monospace; }
+.form-hint { color: var(--muted); font-size: 11px; margin-top: 10px; font-family: 'JetBrains Mono', monospace; }
 
 /* ── REPORT UNAVAILABLE CARD ── */
-.notice-card { background: var(--surface); border: 1px solid rgba(239,68,68,0.25); border-radius: 16px; padding: 28px 24px; text-align: center; margin-bottom: 20px; }
-.notice-icon { font-size: 30px; margin-bottom: 10px; }
-.notice-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; margin-bottom: 8px; }
+.notice-card { background: var(--surface); border: 1px solid rgba(220,38,38,0.25); border-radius: 16px; padding: 28px 24px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+.notice-icon { font-size: 30px; margin-bottom: 10px; color: var(--danger); }
+.notice-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 18px; margin-bottom: 8px; }
 .notice-text { color: var(--muted); font-size: 13px; max-width: 380px; margin: 0 auto 18px; line-height: 1.6; }
 
 /* ── LOADING ── */
@@ -128,42 +180,42 @@ input::placeholder { color: var(--muted); }
 #loading.on { display: block; }
 .spin { width: 44px; height: 44px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto 20px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.loading-msg { color: var(--muted); font-size: 13px; font-family: 'DM Mono', monospace; margin-bottom: 6px; }
-.loading-step { color: var(--accent); font-size: 12px; font-family: 'DM Mono', monospace; }
+.loading-msg { color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+.loading-step { color: var(--accent); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
 
 /* ── ERROR ── */
-.error-msg { display: none; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius); padding: 14px 18px; color: #FCA5A5; font-size: 13px; margin-top: 12px; }
+.error-msg { display: none; background: rgba(220,38,38,0.08); border: 1px solid rgba(220,38,38,0.25); border-radius: var(--radius); padding: 14px 18px; color: #B91C1C; font-size: 13px; margin-top: 12px; }
 .error-msg.on { display: block; }
 
 /* ── RESULTS ── */
 #results { display: none; padding-top: 28px; }
 #results.on { display: block; }
 
-.score-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px 24px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; }
-.score-hero::after { content: ''; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); width: 280px; height: 140px; background: radial-gradient(ellipse, rgba(79,142,247,0.07), transparent 70%); pointer-events: none; }
-.score-url { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 16px; word-break: break-all; }
+.score-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px 24px; text-align: center; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+.score-hero::after { content: ''; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); width: 280px; height: 140px; background: radial-gradient(ellipse, rgba(15,118,110,0.07), transparent 70%); pointer-events: none; }
+.score-url { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 16px; word-break: break-all; }
 .score-row { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; }
-.global-score { font-family: 'Syne', sans-serif; font-size: 88px; font-weight: 800; line-height: 1; }
+.global-score { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 88px; font-weight: 800; line-height: 1; }
 .global-score.good { color: var(--success); }
 .global-score.med  { color: var(--warning); }
 .global-score.bad  { color: var(--danger); }
-.grade-badge { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface2); }
-.grade-badge.good { color: var(--success); border-color: rgba(34,197,94,0.3); }
-.grade-badge.med  { color: var(--warning); border-color: rgba(245,158,11,0.3); }
-.grade-badge.bad  { color: var(--danger); border-color: rgba(239,68,68,0.3); }
+.grade-badge { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 22px; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface2); }
+.grade-badge.good { color: var(--success); border-color: rgba(22,163,74,0.3); }
+.grade-badge.med  { color: var(--warning); border-color: rgba(249,115,22,0.3); }
+.grade-badge.bad  { color: var(--danger); border-color: rgba(220,38,38,0.3); }
 .score-verdict { font-size: 15px; color: var(--muted); margin: 14px 0 20px; }
 .progress-track { background: var(--border); border-radius: 4px; height: 5px; max-width: 320px; margin: 0 auto; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--danger) 0%, var(--warning) 50%, var(--success) 100%); transition: width 1.2s cubic-bezier(.4,0,.2,1); }
 
-.section-head { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin: 28px 0 14px; display: flex; align-items: center; gap: 10px; color: var(--text); }
+.section-head { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 700; margin: 28px 0 14px; display: flex; align-items: center; gap: 10px; color: var(--text); }
 .section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
 .cats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin-bottom: 4px; }
-.cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color 0.2s; }
-.cat-card:hover { border-color: rgba(79,142,247,0.25); }
+.cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color 0.2s, box-shadow 0.2s; box-shadow: 0 6px 18px rgba(0,0,0,0.05); }
+.cat-card:hover { border-color: rgba(15,118,110,0.25); }
 .cat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .cat-name { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
-.cat-num { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; }
+.cat-num { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; }
 .cat-num.good { color: var(--success); }
 .cat-num.med  { color: var(--warning); }
 .cat-num.bad  { color: var(--danger); }
@@ -176,21 +228,21 @@ input::placeholder { color: var(--muted); }
 
 /* Strengths (free preview) */
 .strengths-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-.strength-card { background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.2); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; line-height: 1.55; display: flex; gap: 10px; align-items: flex-start; }
+.strength-card { background: rgba(22,163,74,0.05); border: 1px solid rgba(22,163,74,0.2); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; line-height: 1.55; display: flex; gap: 10px; align-items: flex-start; }
 .strength-card .icon { color: var(--success); flex-shrink: 0; }
 
 /* ── REPORT LINK BANNER ── */
-.report-link-banner { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.25); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; font-size: 13px; color: var(--text); }
+.report-link-banner { background: rgba(22,163,74,0.06); border: 1px solid rgba(22,163,74,0.25); border-radius: var(--radius); padding: 18px; margin-bottom: 20px; font-size: 13px; color: var(--text); }
 .report-link-row { display: flex; gap: 8px; margin-top: 10px; }
-.report-link-row input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; }
+.report-link-row input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--muted); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
 .btn-copy { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 16px; color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .btn-copy:hover { border-color: var(--success); }
 .download-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-.btn-download { background: linear-gradient(135deg, var(--success), #16A34A); border: none; border-radius: var(--radius); padding: 13px 24px; color: white; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: opacity 0.2s, transform 0.15s; }
-.btn-download:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-download { background: var(--success); border: none; border-radius: 999px; padding: 13px 24px; color: white; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s, transform 0.15s; }
+.btn-download:hover { background: #128038; transform: translateY(-1px); }
 .btn-download:disabled { opacity: 0.5; cursor: wait; }
 
-.downloaded-notice { display: none; background: rgba(79,142,247,0.06); border: 1px solid rgba(79,142,247,0.25); border-radius: var(--radius); padding: 16px 18px; margin-top: 14px; font-size: 13px; color: var(--text); }
+.downloaded-notice { display: none; background: rgba(15,118,110,0.06); border: 1px solid rgba(15,118,110,0.25); border-radius: var(--radius); padding: 16px 18px; margin-top: 14px; font-size: 13px; color: var(--text); }
 .downloaded-notice.on { display: block; }
 
 /* ── LOCKED SECTION ── */
@@ -199,36 +251,37 @@ input::placeholder { color: var(--muted); }
 .locked-section.unlocked .blur-content { filter: none; user-select: auto; pointer-events: auto; opacity: 1; }
 .locked-section.unlocked .lock-overlay { display: none; }
 
-.lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(180deg, rgba(7,9,15,0) 0%, rgba(7,9,15,0.85) 40%); border-radius: 16px; z-index: 10; padding: 24px; text-align: center; }
-.lock-icon { font-size: 36px; margin-bottom: 12px; }
-.lock-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(180deg, var(--overlay-fade) 0%, var(--overlay-solid) 40%); border-radius: 16px; z-index: 10; padding: 24px; text-align: center; }
+.lock-icon { font-size: 36px; margin-bottom: 12px; color: var(--warm); }
+.lock-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
 .lock-desc { color: var(--muted); font-size: 13px; margin-bottom: 20px; max-width: 340px; line-height: 1.6; }
 .lock-whats-inside { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; justify-content: center; }
 .lock-feature { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 6px; }
 
-.btn-unlock { background: linear-gradient(135deg, var(--gold), #F97316); border: none; border-radius: var(--radius); padding: 14px 32px; color: white; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; transition: opacity 0.2s, transform 0.15s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(245,158,11,0.3); }
-.btn-unlock:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 24px rgba(245,158,11,0.4); }
+.btn-unlock { background: var(--warm); border: none; border-radius: 999px; padding: 14px 32px; color: white; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; transition: background 0.2s, transform 0.15s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(249,115,22,0.25); }
+.btn-unlock:hover { background: #DD5E0C; transform: translateY(-2px); box-shadow: 0 6px 24px rgba(249,115,22,0.35); }
 .price-tag { background: rgba(255,255,255,0.2); border-radius: 6px; padding: 2px 8px; font-size: 13px; }
 
 /* Quick wins */
-.quickwins-list { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.quickwins-list { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
 .quickwin-item { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; font-size: 13px; line-height: 1.6; }
 .quickwin-item:last-child { border-bottom: none; }
-.quickwin-item .num { font-family: 'DM Mono', monospace; color: var(--gold); font-weight: 600; flex-shrink: 0; }
+.quickwin-item .num { font-family: 'JetBrains Mono', monospace; color: var(--warm); font-weight: 600; flex-shrink: 0; }
 
 /* Payment modal */
 .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
 .modal-bg.open { display: flex; }
 .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 24px 64px rgba(0,0,0,0.5); }
-.modal-icon { font-size: 40px; margin-bottom: 16px; }
-.modal-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.modal-icon { font-size: 40px; margin-bottom: 16px; color: var(--warm); }
+.modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
 .modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 24px; line-height: 1.6; }
-.modal-status { display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; font-size: 13px; color: var(--muted); margin-bottom: 16px; font-family: 'DM Mono', monospace; }
-.modal-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: breathe 1.4s ease-in-out infinite; }
+.modal-status { display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; font-size: 13px; color: var(--muted); margin-bottom: 16px; font-family: 'JetBrains Mono', monospace; }
+.modal-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warm); animation: breathe 1.4s ease-in-out infinite; }
+@keyframes breathe { 0%,100% { opacity:1; box-shadow: 0 0 8px var(--warm); } 50% { opacity:0.5; box-shadow: 0 0 3px var(--warm); } }
 .modal-status.paid { color: var(--success); }
 .modal-status.paid .dot { background: var(--success); animation: none; }
-.pay-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-radius: var(--radius); font-weight: 600; font-size: 15px; cursor: pointer; text-decoration: none; transition: opacity 0.2s, transform 0.15s; border: none; background: linear-gradient(135deg, var(--gold), #F97316); color: white; margin-bottom: 12px; width: 100%; }
-.pay-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.pay-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-radius: 999px; font-weight: 700; font-size: 15px; cursor: pointer; text-decoration: none; transition: background 0.2s, transform 0.15s; border: none; background: var(--warm); color: white; margin-bottom: 12px; width: 100%; }
+.pay-btn:hover { background: #DD5E0C; transform: translateY(-1px); }
 .pay-btn:disabled { opacity: 0.5; cursor: wait; }
 .modal-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
 .modal-close { margin-top: 16px; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 20px; color: var(--muted); cursor: pointer; font-size: 13px; width: 100%; }
@@ -238,7 +291,7 @@ input::placeholder { color: var(--muted); }
 .summary-block { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 20px 22px; font-size: 14px; line-height: 1.75; color: var(--text); }
 
 /* Recs */
-.rec-list { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.rec-list { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
 .rec-item { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; gap: 14px; align-items: flex-start; }
 .rec-item:last-child { border-bottom: none; }
 .rec-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
@@ -249,48 +302,51 @@ input::placeholder { color: var(--muted); }
 .rec-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
 .rec-desc  { font-size: 12px; color: var(--muted); line-height: 1.55; margin-bottom: 8px; }
 .rec-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.rec-tag { display: inline-block; font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 8px; background: var(--border); color: var(--muted); border-radius: 4px; }
-.rec-tag.impact-high { background: rgba(239,68,68,0.12); color: #FCA5A5; }
-.rec-tag.impact-medium { background: rgba(245,158,11,0.12); color: #FCD34D; }
-.rec-tag.impact-low { background: rgba(34,197,94,0.12); color: #86EFAC; }
+.rec-tag { display: inline-block; font-size: 10px; font-family: 'JetBrains Mono', monospace; padding: 2px 8px; background: var(--border); color: var(--muted); border-radius: 4px; }
+.rec-tag.impact-high { background: rgba(220,38,38,0.12); color: #B91C1C; }
+.rec-tag.impact-medium { background: rgba(249,115,22,0.12); color: #B45309; }
+.rec-tag.impact-low { background: rgba(22,163,74,0.12); color: #15803D; }
 
 /* ── MARKETING SECTIONS ── */
 .section { padding: 72px 0; position: relative; z-index: 1; }
 .section-divider { border-top: 1px solid var(--border); }
-.section-kicker { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; text-align: center; }
-.section-title { font-family: 'Syne', sans-serif; font-size: clamp(24px, 3.6vw, 34px); font-weight: 800; text-align: center; margin-bottom: 14px; letter-spacing: -0.02em; }
+.section-kicker { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; text-align: center; }
+.section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(24px, 3.6vw, 34px); font-weight: 800; text-align: center; margin-bottom: 14px; letter-spacing: -0.02em; }
 .section-sub { color: var(--muted); font-size: 14px; text-align: center; max-width: 560px; margin: 0 auto 44px; line-height: 1.7; }
 
-.value-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
-.value-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; transition: transform 0.2s, border-color 0.2s; }
-.value-card:hover { transform: translateY(-3px); border-color: rgba(79,142,247,0.3); }
-.value-icon { font-size: 22px; margin-bottom: 14px; }
-.value-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+.value-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; }
+.value-card { flex: 1 1 240px; max-width: 248px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; box-shadow: 0 6px 18px rgba(0,0,0,0.05); }
+.value-card:hover { transform: translateY(-3px); border-color: rgba(15,118,110,0.3); }
+.value-icon { font-size: 22px; margin-bottom: 14px; color: var(--accent); }
+.value-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 8px; }
 .value-text { color: var(--muted); font-size: 13px; line-height: 1.65; }
 
-.cost-panel { background: var(--surface); border: 1px solid rgba(239,68,68,0.2); border-radius: 18px; padding: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
-.cost-item { padding: 22px; border-radius: 12px; }
-.cost-num { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; color: var(--danger); margin-bottom: 8px; line-height: 1; }
+.cost-panel { background: var(--surface); border: 1px solid rgba(220,38,38,0.2); border-radius: 18px; padding: 8px; display: flex; flex-wrap: wrap; justify-content: center; }
+.cost-item { flex: 1 1 230px; max-width: 250px; padding: 22px; border-radius: 12px; }
+.cost-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; color: var(--danger); margin-bottom: 8px; line-height: 1; }
 .cost-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
 .cost-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
 
-.steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-.step-card { text-align: center; padding: 8px; }
-.step-num { width: 40px; height: 40px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; color: var(--accent); font-size: 14px; margin: 0 auto 14px; }
-.step-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+.steps-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+.step-card { flex: 1 1 220px; max-width: 240px; text-align: center; padding: 8px; }
+.step-num { width: 40px; height: 40px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 14px; margin: 0 auto 14px; }
+.step-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 6px; }
 .step-text { color: var(--muted); font-size: 12.5px; line-height: 1.6; max-width: 230px; margin: 0 auto; }
 
-.cta-band { background: linear-gradient(135deg, rgba(79,142,247,0.1), rgba(168,85,247,0.08)); border: 1px solid var(--border); border-radius: 20px; padding: 44px 30px; text-align: center; }
-.cta-band h3 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+.cta-band { background: linear-gradient(135deg, rgba(15,118,110,0.1), rgba(37,99,235,0.08)); border: 1px solid var(--border); border-radius: 20px; padding: 44px 30px; text-align: center; }
+.cta-band h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 10px; }
 .cta-band p { color: var(--muted); font-size: 14px; margin-bottom: 22px; }
 .cta-band .btn-primary { padding: 14px 32px; font-size: 15px; }
 
 /* ── FOOTER ── */
 footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 40px; }
 .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; margin-bottom: 36px; }
-.footer-brand { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.footer-brand { display: flex; align-items: center; gap: 8px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 12px; }
+.footer-social { display: flex; gap: 14px; margin-top: 16px; }
+.footer-social a { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: 15px; text-decoration: none; transition: color 0.2s, border-color 0.2s; }
+.footer-social a:hover { color: var(--accent); border-color: var(--accent); }
 .footer-desc { color: var(--muted); font-size: 12.5px; line-height: 1.65; max-width: 260px; }
-.footer-col-title { font-size: 11px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 14px; }
+.footer-col-title { font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 14px; }
 .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .footer-links a { color: var(--text); text-decoration: none; font-size: 13px; opacity: 0.85; }
 .footer-links a:hover { opacity: 1; color: var(--accent); }
@@ -311,27 +367,33 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
 <!-- NAV -->
 <nav class="navbar">
   <div class="nav-inner">
-    <a href="#top" class="nav-brand"><span class="brand-dot"></span>PulseAudit</a>
+    <a href="#top" class="nav-brand"><i class="bi bi-speedometer2 brand-icon"></i>PulseAudit</a>
     <ul class="nav-links">
-      <li><a href="#audit">Free Audit</a></li>
-      <li><a href="#why-performance">Why It Matters</a></li>
-      <li><a href="#cost">Cost of a Bad Site</a></li>
-      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#audit">Dashboard</a></li>
+      <li><a href="#why-performance">Features</a></li>
+      <li><a href="#cost">Insights</a></li>
       <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
     </ul>
-    <a href="#audit" class="nav-cta">Audit my site →</a>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+        <i class="bi bi-moon-stars-fill" id="themeIconDark"></i>
+        <i class="bi bi-sun-fill" id="themeIconLight" style="display:none;"></i>
+      </button>
+      <a href="#audit" class="nav-cta">Start Free Audit</a>
+    </div>
   </div>
 </nav>
 
 <!-- PAYMENT MODAL -->
 <div class="modal-bg" id="payModal">
   <div class="modal">
-    <div class="modal-icon">🔓</div>
+    <div class="modal-icon"><i class="bi bi-unlock-fill"></i></div>
     <div class="modal-title">Unlock Your Full Report</div>
     <div class="modal-sub">Get the complete audit — executive summary, quick wins, and a prioritized action plan — plus a downloadable PDF, for a one-time payment of <strong id="modalPrice">14,99 $</strong>, paid securely in crypto via NOWPayments.</div>
 
     <div id="modalIdle">
-      <button class="pay-btn" id="payBtn" onclick="beginPayment()">💳 Pay <span class="priceInline">14,99 $</span> with NOWPayments</button>
+      <button class="pay-btn" id="payBtn" onclick="beginPayment()"><i class="bi bi-credit-card-fill"></i> Pay <span class="priceInline">14,99 $</span> with NOWPayments</button>
       <div class="modal-note">You'll be redirected to a secure NOWPayments checkout page. Once your payment is confirmed, this page unlocks automatically — no need to refresh.</div>
     </div>
 
@@ -346,33 +408,72 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
 
 <div id="top"></div>
 
-<div class="wrap">
-  <header class="hero">
-    <div class="eyebrow">✨ AI-Powered Website Audit</div>
-    <h1>Your website audit,<br><em>powered by AI</em></h1>
-    <p class="tagline">Instant SEO, performance, UX &amp; security analysis for businesses anywhere in the world.</p>
-    <p class="hero-note">No signup. No credit card to see your score. Full PDF report for a small one-time fee.</p>
-  </header>
+<div class="wrap wrap-hero">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <header class="hero">
+        <div class="eyebrow"><i class="bi bi-stars"></i> AI-Powered Website Audit</div>
+        <h1>Analyze your website<br>in <em>under 30 seconds</em></h1>
+        <p class="tagline">Instant SEO, performance, UX &amp; security analysis for businesses anywhere in the world.</p>
+        <ul class="hero-checklist">
+          <li><i class="bi bi-check-circle-fill"></i> SEO</li>
+          <li><i class="bi bi-check-circle-fill"></i> Speed</li>
+          <li><i class="bi bi-check-circle-fill"></i> Security</li>
+          <li><i class="bi bi-check-circle-fill"></i> Accessibility</li>
+        </ul>
+      </header>
 
-  <!-- AUDIT FORM -->
-  <div class="audit-card" id="audit">
-    <div class="field-group">
-      <div class="field-label">Website to audit</div>
-      <div class="input-row">
-        <input type="text" id="urlInput" placeholder="https://example.com"/>
-        <button class="btn-primary" id="auditBtn" onclick="startAudit()">Audit Now</button>
+      <!-- AUDIT FORM -->
+      <div class="audit-card" id="audit">
+        <div class="field-group">
+          <div class="field-label">Website to audit</div>
+          <div class="input-row">
+            <input type="text" id="urlInput" placeholder="https://example.com"/>
+            <button class="btn-primary" id="auditBtn" onclick="startAudit()">Audit Now</button>
+          </div>
+          <div class="form-hint">Takes about 15–20 seconds.</div>
+        </div>
+        <div class="error-msg" id="errBox"></div>
+        <p class="hero-note">No signup. No credit card to see your score. Full PDF report for a small one-time fee.</p>
       </div>
-      <div class="form-hint">Takes about 15–20 seconds.</div>
-    </div>
-    <div class="error-msg" id="errBox"></div>
-  </div>
 
-  <!-- REPORT UNAVAILABLE (bad/consumed ?order_id= link) -->
-  <div class="notice-card" id="reportUnavailable" style="display:none;">
-    <div class="notice-icon">📄</div>
-    <div class="notice-title">This report link isn't available anymore</div>
-    <div class="notice-text" id="reportUnavailableText">It may already have been downloaded, or the link is invalid. Run a new audit to generate a fresh report.</div>
-    <button class="btn-primary" onclick="window.location.href = window.location.pathname;">Start a new audit</button>
+      <!-- REPORT UNAVAILABLE (bad/consumed ?order_id= link) -->
+      <div class="notice-card" id="reportUnavailable" style="display:none;">
+        <div class="notice-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+        <div class="notice-title">This report link isn't available anymore</div>
+        <div class="notice-text" id="reportUnavailableText">It may already have been downloaded, or the link is invalid. Run a new audit to generate a fresh report.</div>
+        <button class="btn-primary" onclick="window.location.href = window.location.pathname;">Start a new audit</button>
+      </div>
+    </div>
+
+    <div class="hero-right" aria-hidden="true">
+      <svg viewBox="0 0 420 400" xmlns="http://www.w3.org/2000/svg" class="hero-illustration">
+        <rect x="30" y="30" width="360" height="250" rx="18" fill="var(--surface)" stroke="var(--border)" stroke-width="2"/>
+        <circle cx="55" cy="55" r="5" fill="var(--danger)"/>
+        <circle cx="72" cy="55" r="5" fill="var(--warning)"/>
+        <circle cx="89" cy="55" r="5" fill="var(--success)"/>
+        <rect x="55" y="90" width="130" height="130" rx="12" fill="var(--surface2)"/>
+        <circle cx="120" cy="155" r="46" fill="none" stroke="var(--border)" stroke-width="12"/>
+        <circle cx="120" cy="155" r="46" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="245" stroke-dashoffset="55" transform="rotate(-90 120 155)"/>
+        <text x="120" y="150" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="30" font-weight="800" fill="var(--text)">92</text>
+        <text x="120" y="172" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" fill="var(--muted)">Excellent</text>
+        <rect x="205" y="90" width="150" height="28" rx="6" fill="var(--surface2)"/>
+        <rect x="205" y="90" width="120" height="28" rx="6" fill="var(--accent2)"/>
+        <rect x="205" y="128" width="150" height="28" rx="6" fill="var(--surface2)"/>
+        <rect x="205" y="128" width="95" height="28" rx="6" fill="var(--accent)"/>
+        <rect x="205" y="166" width="150" height="28" rx="6" fill="var(--surface2)"/>
+        <rect x="205" y="166" width="132" height="28" rx="6" fill="var(--warm)"/>
+        <rect x="205" y="204" width="150" height="28" rx="6" fill="var(--surface2)"/>
+        <rect x="205" y="204" width="70" height="28" rx="6" fill="var(--success)"/>
+        <rect x="55" y="240" width="300" height="6" rx="3" fill="var(--surface2)"/>
+        <rect x="55" y="240" width="230" height="6" rx="3" fill="var(--accent)"/>
+        <rect x="150" y="300" width="220" height="80" rx="16" fill="var(--accent)"/>
+        <path d="M172 350 l16 -30 l14 18 l12 -22 l16 20" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="335" cy="322" r="9" fill="var(--warm)"/>
+        <rect x="10" y="180" width="150" height="60" rx="14" fill="var(--surface)" stroke="var(--border)" stroke-width="2"/>
+        <path d="M28 218 l14 -20 l12 12 l16 -26 l18 22" fill="none" stroke="var(--accent2)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
   </div>
 
   <!-- LOADING -->
@@ -401,15 +502,15 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
     <div class="strengths-grid" id="strengthsGrid" style="margin-bottom: 8px;"></div>
 
     <div class="report-link-banner" id="reportLinkBanner" style="display:none;">
-      <span>✅ Payment confirmed — your full report is unlocked below. <strong>Download the PDF to keep it</strong>: once downloaded, this link stops working and a new audit + payment is needed for another report.</span>
+      <span><i class="bi bi-check-circle-fill"></i> Payment confirmed — your full report is unlocked below. <strong>Download the PDF to keep it</strong>: once downloaded, this link stops working and a new audit + payment is needed for another report.</span>
       <div class="report-link-row">
         <input type="text" id="reportLinkInput" readonly onclick="this.select()"/>
         <button class="btn-copy" id="copyLinkBtn" onclick="copyReportLink()">Copy link</button>
       </div>
       <div class="download-row">
-        <button class="btn-download" id="downloadBtn" onclick="downloadReport()">📄 Download PDF Report</button>
+        <button class="btn-download" id="downloadBtn" onclick="downloadReport()"><i class="bi bi-file-earmark-text-fill"></i> Download PDF Report</button>
       </div>
-      <div class="downloaded-notice" id="downloadedNotice">✅ Downloaded! This report link has been used and is now inactive. Run a new audit whenever you need another report.</div>
+      <div class="downloaded-notice" id="downloadedNotice"><i class="bi bi-check-circle-fill"></i> Downloaded! This report link has been used and is now inactive. Run a new audit whenever you need another report.</div>
     </div>
 
     <div class="locked-section" id="lockedBlock">
@@ -424,16 +525,16 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
         <div class="rec-list" id="recList"></div>
       </div>
       <div class="lock-overlay" id="lockOverlay">
-        <div class="lock-icon">🔒</div>
+        <div class="lock-icon"><i class="bi bi-shield-lock-fill"></i></div>
         <div class="lock-title">Full Report Locked</div>
         <div class="lock-desc">Your score, grade, and top strengths are free. Unlock the complete audit — plus a downloadable PDF — to see your quick wins and full action plan.</div>
         <div class="lock-whats-inside">
-          <div class="lock-feature">⚡ Quick Wins</div>
-          <div class="lock-feature">📋 Executive Summary</div>
-          <div class="lock-feature">🎯 Priority Action Plan</div>
-          <div class="lock-feature">📄 PDF Export</div>
+          <div class="lock-feature"><i class="bi bi-lightning-charge-fill"></i> Quick Wins</div>
+          <div class="lock-feature"><i class="bi bi-clipboard-data"></i> Executive Summary</div>
+          <div class="lock-feature"><i class="bi bi-bullseye"></i> Priority Action Plan</div>
+          <div class="lock-feature"><i class="bi bi-file-earmark-text-fill"></i> PDF Export</div>
         </div>
-        <button class="btn-unlock" onclick="openModal()">🔓 Unlock Full Report <span class="price-tag priceInline">14,99 $</span></button>
+        <button class="btn-unlock" onclick="openModal()"><i class="bi bi-unlock-fill"></i> Unlock Full Report <span class="price-tag priceInline">14,99 $</span></button>
       </div>
     </div>
   </div>
@@ -447,32 +548,32 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
     <p class="section-sub">Your website is often the first — and only — impression a customer forms of your business, wherever in the world they're browsing from. Small technical gaps translate directly into lost customers.</p>
     <div class="value-grid">
       <div class="value-card">
-        <div class="value-icon">🔍</div>
+        <div class="value-icon"><i class="bi bi-search"></i></div>
         <div class="value-title">Better search visibility</div>
         <div class="value-text">Search engines favor sites with clean structure, fast load times, and mobile-friendly layouts. Fixing technical SEO issues helps the right customers find you before they find a competitor.</div>
       </div>
       <div class="value-card">
-        <div class="value-icon">⚡</div>
+        <div class="value-icon"><i class="bi bi-lightning-charge-fill"></i></div>
         <div class="value-title">Visitors who actually stay</div>
         <div class="value-text">People decide whether to stay on a page within seconds. A site that loads quickly and feels responsive keeps visitors engaged long enough to explore what you offer.</div>
       </div>
       <div class="value-card">
-        <div class="value-icon">🛒</div>
+        <div class="value-icon"><i class="bi bi-cart3"></i></div>
         <div class="value-title">More completed actions</div>
         <div class="value-text">Clear navigation, obvious calls to action, and a smooth checkout or contact flow are what turn browsing into inquiries, bookings, or sales.</div>
       </div>
       <div class="value-card">
-        <div class="value-icon">🔒</div>
+        <div class="value-icon"><i class="bi bi-shield-lock-fill"></i></div>
         <div class="value-title">Trust at first glance</div>
         <div class="value-text">A valid HTTPS certificate, working forms, and a modern design signal that your business is legitimate and worth doing business with.</div>
       </div>
       <div class="value-card">
-        <div class="value-icon">📱</div>
+        <div class="value-icon"><i class="bi bi-phone"></i></div>
         <div class="value-title">A mobile-first audience</div>
         <div class="value-text">The majority of visitors worldwide now browse on mobile first. A site that isn't built mobile-first is turning away most of its traffic before it even loads.</div>
       </div>
       <div class="value-card">
-        <div class="value-icon">📊</div>
+        <div class="value-icon"><i class="bi bi-bar-chart-fill"></i></div>
         <div class="value-title">Compounding advantage</div>
         <div class="value-text">Performance improvements stack over time — better rankings bring more traffic, which a well-converting site turns into more customers, funding further improvements.</div>
       </div>
@@ -488,32 +589,32 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
     <p class="section-sub">Most business owners never see the visitors who leave — they just see the traffic numbers, not the reasons people didn't convert.</p>
     <div class="cost-panel">
       <div class="cost-item">
-        <div class="cost-num">👋</div>
+        <div class="cost-num"><i class="bi bi-hand-index-thumb"></i></div>
         <div class="cost-label">Silent bounces</div>
         <div class="cost-text">A slow-loading page loses visitors before they've read a single word — and most never come back to try again.</div>
       </div>
       <div class="cost-item">
-        <div class="cost-num">📉</div>
+        <div class="cost-num"><i class="bi bi-graph-down-arrow"></i></div>
         <div class="cost-label">Invisible in search</div>
         <div class="cost-text">Missing titles, broken meta tags, and poor structure keep your site buried below competitors who fixed theirs.</div>
       </div>
       <div class="cost-item">
-        <div class="cost-num">🚪</div>
+        <div class="cost-num"><i class="bi bi-door-open"></i></div>
         <div class="cost-label">Confused visitors leave</div>
         <div class="cost-text">Unclear navigation and buried contact forms mean interested customers give up instead of reaching out.</div>
       </div>
       <div class="cost-item">
-        <div class="cost-num">⚠️</div>
+        <div class="cost-num"><i class="bi bi-exclamation-triangle-fill"></i></div>
         <div class="cost-label">Trust erodes fast</div>
         <div class="cost-text">An expired certificate or a dated, broken layout makes visitors question whether your business is still active — or safe to buy from.</div>
       </div>
       <div class="cost-item">
-        <div class="cost-num">📵</div>
+        <div class="cost-num"><i class="bi bi-wifi-off"></i></div>
         <div class="cost-label">Mobile friction</div>
         <div class="cost-text">Tiny buttons, unreadable text, and layouts that don't adapt to phones frustrate the majority of your visitors on their first visit.</div>
       </div>
       <div class="cost-item">
-        <div class="cost-num">🏁</div>
+        <div class="cost-num"><i class="bi bi-flag-fill"></i></div>
         <div class="cost-label">Ceding ground to competitors</div>
         <div class="cost-text">Every week these issues go unfixed is a week a competitor's better-optimized site keeps winning the customers you could have had.</div>
       </div>
@@ -562,8 +663,13 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
   <div class="wrap-wide">
     <div class="footer-grid">
       <div>
-        <div class="footer-brand"><span class="brand-dot"></span>PulseAudit</div>
+        <div class="footer-brand"><i class="bi bi-speedometer2 brand-icon"></i>PulseAudit</div>
         <div class="footer-desc">AI-powered website audits for SEO, performance, UX and security — for businesses anywhere in the world.</div>
+        <div class="footer-social">
+          <a href="#" aria-label="X / Twitter"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+          <a href="#" aria-label="GitHub"><i class="bi bi-github"></i></a>
+        </div>
       </div>
       <div>
         <div class="footer-col-title">Product</div>
@@ -597,6 +703,24 @@ footer { border-top: 1px solid var(--border); padding: 48px 0 28px; margin-top: 
 
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
+
+// ── THEME TOGGLE ──
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeIconDark').style.display = theme === 'dark' ? 'none' : 'inline-block';
+  document.getElementById('themeIconLight').style.display = theme === 'dark' ? 'inline-block' : 'none';
+  try { localStorage.setItem('pulseaudit-theme', theme); } catch (e) {}
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+(function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem('pulseaudit-theme'); } catch (e) {}
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+})();
 
 const REPORT_PRICE = 14.99; // keep in sync with PRICE_USD in netlify/functions/create-payment.js
 function formatPrice(p) { return p.toFixed(2).replace('.', ',') + ' $'; }
@@ -718,7 +842,7 @@ function render(a, url) {
   const strengthsGrid = document.getElementById('strengthsGrid');
   if (a.strengths && a.strengths.length) {
     strengthsHead.style.display = 'flex';
-    strengthsGrid.innerHTML = a.strengths.map(s => `<div class="strength-card"><span class="icon">✓</span><span>${s}</span></div>`).join('');
+    strengthsGrid.innerHTML = a.strengths.map(s => `<div class="strength-card"><span class="icon"><i class="bi bi-check-circle-fill"></i></span><span>${s}</span></div>`).join('');
   } else {
     strengthsHead.style.display = 'none';
     strengthsGrid.innerHTML = '';
@@ -786,7 +910,7 @@ async function beginPayment() {
   } catch (e) {
     alert('Payment error: ' + (e.message || 'Please try again.'));
     btn.disabled = false;
-    btn.textContent = '💳 Pay ' + formatPrice(REPORT_PRICE) + ' with NOWPayments';
+    btn.innerHTML = '<i class="bi bi-credit-card-fill"></i> Pay ' + formatPrice(REPORT_PRICE) + ' with NOWPayments';
   }
 }
 
@@ -847,7 +971,7 @@ function buildPdf(audit, url) {
   let y = 0;
 
   const colors = {
-    accent: [79, 142, 247],
+    accent: [15, 118, 110],
     dark: [15, 21, 32],
     muted: [90, 106, 138],
     success: [22, 163, 74],
@@ -1041,7 +1165,7 @@ async function downloadReport() {
     alert('Could not generate the PDF. Please try again.');
   } finally {
     btn.disabled = false;
-    btn.textContent = '📄 Download PDF Report';
+    btn.innerHTML = '<i class="bi bi-file-earmark-text-fill"></i> Download PDF Report';
   }
 }
 
